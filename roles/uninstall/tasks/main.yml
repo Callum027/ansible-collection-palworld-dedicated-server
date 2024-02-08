@@ -4,12 +4,18 @@
   ansible.builtin.import_role:
     name: common
 
-- name: Destroy services
+- name: Check if the compose file exists
+  ansible.builtin.stat:
+    path: "{{ palworld_dedicated_server_install_directory }}/docker-compose.yml"
+  register: palworld_dedicated_server_temp_compose_file
+
+- name: Destroy services (if the compose file exists)
   community.docker.docker_compose_v2:
     project_src: "{{ palworld_dedicated_server_install_directory }}"
     state: absent  # Run 'docker compose down'.
     remove_orphans: true  # Remove orphan services (not defined in the compose file).
     remove_images: all  # Remove all images used by the compose file, if unused.
+  when: palworld_dedicated_server_temp_compose_file.stat.isreg | default(False)
 
 - name: Delete install directory
   ansible.builtin.file:

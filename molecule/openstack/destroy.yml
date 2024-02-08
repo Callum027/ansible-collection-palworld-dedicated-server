@@ -1,0 +1,93 @@
+---
+
+- name: Destroy Molecule instances
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    ci_prefix: "{{ lookup('env', 'CI_PREFIX', default='molecule-callum027.palworld_dedicated_server') }}"
+    keypair_name: "{{ ci_prefix | replace('.', '_') }}"
+    security_group_name: "{{ ci_prefix }}"
+    network_name: "{{ ci_prefix }}"
+    subnet_name: "{{ ci_prefix }}"
+    router_name: "{{ ci_prefix }}"
+
+  tasks:
+    - name: Read Molecule instance config (if it exists)
+      ansible.builtin.set_fact:
+        instances: >-
+          {{
+          lookup('file', molecule_instance_config, errors='ignore')
+          | default([], true)
+          | from_yaml
+          | flatten(levels=1)
+          }}
+
+    - name: Destroy Molecule instance(s)
+      openstack.cloud.server:
+        name: "{{ item.instance_id | default(item.name) }}"
+        state: absent
+        delete_fip: true
+      register: server
+      loop: "{{ instances | default((molecule_yml.platforms | flatten(levels=1)), true) }}"
+      async: 7200
+      poll: 0
+
+    - name: Wait for instance(s) deletion to complete
+      ansible.builtin.async_status:
+        jid: "{{ item.ansible_job_id }}"
+      register: os_jobs
+      until: os_jobs.finished
+      retries: 300
+      loop: "{{ server.results | flatten(levels=1) }}"
+      ignore_errors: true  # We're going to try again anyway.
+
+    # We can't add retries to async jobs. Doubling this up will result in only
+    # slightly more time used in the normal case but if there are OpenStack API errors,
+    # this will allow more time to really get rid of the instances.
+    - name: Try really hard to delete any remaining instances
+      openstack.cloud.server:
+        name: "{{ item.instance_id }}"
+        state: absent
+        delete_fip: true
+      register: server
+      loop: "{{ instances | default((molecule_yml.platforms | flatten(levels=1)), true) }}"
+      until: server is not failed
+      retries: 5
+      delay: 15
+
+    - name: Delete Molecule instance network router
+      openstack.cloud.router:
+        name: "{{ router_name }}"
+        state: absent
+      register: result
+      until: result is not failed
+      retries: 5
+      delay: 15
+
+    - name: Delete Molecule instance network
+      openstack.cloud.network:
+        name: "{{ network_name }}"
+        state: absent
+      register: result
+      until: result is not failed
+      retries: 5
+      delay: 15
+
+    - name: Delete security group
+      openstack.cloud.security_group:
+        name: "{{ security_group_name }}"
+        state: absent
+      register: result
+      until: result is not failed
+      retries: 5
+      delay: 15
+
+    - name: Delete remote keypair
+      openstack.cloud.keypair:
+        name: "{{ keypair_name }}"
+        state: absent
+      register: result
+      until: result is not failed
+      retries: 5
+      delay: 15

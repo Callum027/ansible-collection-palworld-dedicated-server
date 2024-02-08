@@ -1,0 +1,63 @@
+---
+
+dependency:
+  name: galaxy
+  options:
+    requirements-file: requirements.yml
+
+platforms:
+  - name: ${CI_PREFIX}-palworld1
+    image: ubuntu-22.04-x86_64
+    groups:
+      - palworld
+
+provisioner:
+  name: ansible
+  playbooks:
+    prepare: ../base/prepare.yml
+    converge: ../base/converge.yml
+    verify: ../base/verify.yml
+  inventory:
+    group_vars:
+      palworld:
+        palworld_dedicated_server_molecule_testing: true
+        palworld_dedicated_server_molecule_openstack: true
+        palworld_dedicated_server_user_uid: 300
+        palworld_dedicated_server_user_gid: 300
+    host_vars:
+      ${CI_PREFIX}-palworld1:
+        palworld_dedicated_server_settings:
+          SERVER_NAME: palworld1
+          SERVER_DESCRIPTION: Molecule test for Palworld Dedicated Server (palworld1)
+          ADMIN_PASSWORD: "123456"
+          SERVER_PASSWORD: "123456"
+          COMMUNITY_SERVER: false
+
+verifier:
+  name: ansible
+
+scenario:
+  test_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - check
+    - check ../base/restart.yml
+    - check ../base/stop.yml
+    - check ../base/uninstall.yml
+    - converge
+    - idempotence
+    - verify
+    - side_effect ../base/restart.yml
+    - verify
+    - side_effect ../base/stop.yml
+    - verify ../base/verify_stop.yml
+    - side_effect ../base/uninstall.yml
+    - verify ../base/verify_uninstall.yml
+    # Run uninstall again to ensure it works even if already uninstalled.
+    - side_effect ../base/uninstall.yml
+    - cleanup
+    - destroy

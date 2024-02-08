@@ -1,0 +1,180 @@
+---
+
+- name: Create Molecule instances
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    ssh_port: 22
+    ci_prefix: "{{ lookup('env', 'CI_PREFIX', default='molecule-callum027.palworld_dedicated_server') }}"
+    keypair_name: "{{ ci_prefix | replace('.', '_') }}"
+    keypair_path: "{{ lookup('env', 'MOLECULE_EPHEMERAL_DIRECTORY') }}/ssh_key"
+    security_group_name: "{{ ci_prefix }}"
+    network_name: "{{ ci_prefix }}"
+    subnet_name: "{{ ci_prefix }}"
+    subnet_cidr: "10.0.0.0/24"
+    router_name: "{{ ci_prefix }}"
+    public_network_name: "public-net"
+    default_flavor: "c2-burst.c1r1"
+    default_ssh_user: "ubuntu"
+
+  tasks:
+    - name: Check if the local copy of the keypair private key exists
+      ansible.builtin.stat:
+        path: "{{ keypair_path }}"
+      register: local_keypair
+
+    - name: Delete remote keypair (if the private key does not exist locally)
+      openstack.cloud.keypair:
+        name: "{{ keypair_name }}"
+        state: absent
+      when: not (local_keypair.stat.exists | default(False))
+
+    - name: Create keypair
+      openstack.cloud.keypair:
+        name: "{{ keypair_name }}"
+      register: remote_keypair
+
+    - name: Write the keypair private key to disk (if recreated)  # noqa: no-handler
+      ansible.builtin.copy:
+        content: >-
+          {{ remote_keypair.keypair.private_key | default(remote_keypair.key.private_key) }}
+        dest: "{{ keypair_path }}"
+        mode: "0600"
+      when: remote_keypair.changed
+
+    - name: Create the Molecule security group
+      openstack.cloud.security_group:
+        name: "{{ security_group_name }}"
+        description: "Access to Molecule machines ({{ ci_prefix }})"
+
+    - name: Allow ICMP traffic from anywhere
+      openstack.cloud.security_group_rule:
+        security_group: "{{ security_group_name }}"
+        protocol: icmp
+        remote_ip_prefix: "0.0.0.0/0"
+
+    - name: Allow all traffic within the same security group
+      openstack.cloud.security_group_rule:
+        security_group: "{{ security_group_name }}"
+        protocol: "{{ item }}"
+        remote_group: "{{ security_group_name }}"
+      loop:
+        - tcp
+        - udp
+        - icmp
+
+    - name: Allow SSH access from the Internet
+      openstack.cloud.security_group_rule:
+        security_group: "{{ security_group_name }}"
+        protocol: tcp
+        port_range_min: 22
+        port_range_max: 22
+        remote_ip_prefix: "0.0.0.0/0"
+
+    - name: Create Molecule instance network
+      openstack.cloud.network:
+        name: "{{ network_name }}"
+        external: false
+
+    - name: Create Molecule instance network subnet
+      openstack.cloud.subnet:
+        name: "{{ subnet_name }}"
+        network_name: "{{ network_name }}"
+        ip_version: 4
+        cidr: "{{ subnet_cidr }}"
+        enable_dhcp: true
+
+    - name: Check if the Molecule instance network router exists
+      openstack.cloud.routers_info:
+        name: "{{ router_name }}"
+      register: router
+
+    - name: Create Molecule instance network router (if it does not exist)
+      when: not router.routers
+      block:
+        - name: Get public network network metadata
+          openstack.cloud.networks_info:
+            name: "{{ public_network_name }}"
+          register: public_net
+        - name: Create Molecule instance network router
+          openstack.cloud.router:
+            name: "{{ router_name }}"
+            network: "{{ public_network_name }}"
+            interfaces:
+              - "{{ subnet_name }}"
+
+    - name: Create Molecule instance(s)
+      openstack.cloud.server:
+        name: "{{ item.name }}"
+        image: "{{ item.image }}"
+        flavor: "{{ item.flavor | default(default_flavor, true) }}"
+        security_groups:
+          - "{{ security_group_name }}"
+        key_name: "{{ keypair_name }}"
+        network: "{{ network_name }}"
+        auto_ip: true
+        meta:
+          ssh_user: "{{ item.ssh_user | default(default_ssh_user, true) }}"
+      register: server_creations
+      loop: "{{ molecule_yml.platforms | flatten(levels=1) }}"
+      async: 7200
+      poll: 0
+
+    - name: Wait for instance(s) creation to complete
+      ansible.builtin.async_status:
+        jid: "{{ item.ansible_job_id }}"
+      register: os_jobs
+      until: os_jobs.finished
+      retries: 300
+      loop: "{{ server_creations.results | flatten(levels=1) }}"
+
+    - name: Get Molecule instance metadata
+      openstack.cloud.server_info:
+        name: "{{ item.name }}"
+      register: servers
+      loop: "{{ molecule_yml.platforms | flatten(levels=1) }}"
+
+    # Mandatory configuration for Molecule to function.
+    - name: Populate instance config dict
+      ansible.builtin.set_fact:
+        instance_conf_dict:
+          instance: "{{ item.servers[0].name }}"
+          instance_id: "{{ item.servers[0].id }}"
+          address: "{{ item.servers[0].addresses[network_name][1].addr }}"
+          user: "{{ item.servers[0].metadata.ssh_user }}"
+          port: "{{ ssh_port }}"
+          identity_file: "{{ keypair_path }}"
+      loop: "{{ servers.results }}"
+      register: instance_config_dict
+
+    - name: Convert instance config dict to a list
+      ansible.builtin.set_fact:
+        instance_conf: >-
+          {{
+          instance_config_dict.results
+          | map(attribute='ansible_facts.instance_conf_dict')
+          | list
+          }}
+
+    - name: Print instance config
+      ansible.builtin.debug:
+        var: instance_conf
+
+    - name: Dump instance config
+      ansible.builtin.copy:
+        content: "{{ instance_conf | to_json | from_json | to_yaml }}"
+        dest: "{{ molecule_instance_config }}"
+        mode: "0644"
+
+    - name: Print path to instance config file
+      ansible.builtin.debug:
+        var: molecule_instance_config
+
+    - name: Wait for SSH
+      ansible.builtin.wait_for:
+        port: "{{ ssh_port }}"
+        host: "{{ item.address }}"
+        search_regex: SSH
+        delay: 10
+      loop: "{{ lookup('file', molecule_instance_config) | from_yaml | flatten(levels=1) }}"

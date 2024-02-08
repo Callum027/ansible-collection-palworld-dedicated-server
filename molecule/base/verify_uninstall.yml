@@ -4,17 +4,20 @@
   hosts: palworld
   become: true
   tasks:
-    - name: Get container info
-      community.docker.docker_container_info:
-        name: palworld-dedicated-server_palworld-dedicated-server_1
-      register: result
-    - name: Check that the container does not exist
-      ansible.builtin.assert:
-        that:
-          - not result.exists
-        success_msg: Container does not exist
-        fail_msg: Container exists
-        quiet: true
+    - name: Check service status (if not running in Molecule using Docker)
+      when: not palworld_dedicated_server_molecule_docker
+      block:
+        - name: Get container info
+          community.docker.docker_container_info:
+            name: palworld-dedicated-server_palworld-dedicated-server_1
+          register: result
+        - name: Check that the container does not exist
+          ansible.builtin.assert:
+            that:
+              - not result.exists
+            success_msg: Container does not exist
+            fail_msg: Container exists
+            quiet: true
     - name: Check that the install directory does not exist
       ansible.builtin.stat:
         path: /opt/palworld

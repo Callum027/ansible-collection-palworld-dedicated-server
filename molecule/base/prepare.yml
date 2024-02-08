@@ -35,3 +35,9 @@
           - docker-buildx-plugin
           - docker-compose-plugin
           - python3-docker
+    - name: Start Docker service
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+      when: not palworld_dedicated_server_molecule_docker

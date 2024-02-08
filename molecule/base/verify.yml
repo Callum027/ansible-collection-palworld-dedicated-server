@@ -36,18 +36,22 @@
         path: /opt/palworld/docker-compose.yml
       register: dockercompose_file
       failed_when: not (dockercompose_file.stat.isreg | default(False))
-    - name: Get container info
-      community.docker.docker_container_info:
-        name: palworld-dedicated-server_palworld-dedicated-server_1
-      register: result
-    - name: Check that the container is running
-      ansible.builtin.assert:
-        that:
-          - result.container.State.Running
-        success_msg: Container is running
-        fail_msg: Container is not running
-        quiet: true
-    - name: Check that the RCON port is open (if enabled)
-      ansible.builtin.wait_for:
-        port: "{{ palworld_dedicated_server_rcon_port }}"
-        timeout: 30
+    - name: Check service status (if not running in Molecule using Docker)
+      when: not palworld_dedicated_server_molecule_docker
+      block:
+        - name: Get container info
+          community.docker.docker_container_info:
+            name: palworld-dedicated-server_palworld-dedicated-server_1
+          register: result
+        - name: Check that the container is running
+          ansible.builtin.assert:
+            that:
+              - result.container.State.Running
+            success_msg: Container is running
+            fail_msg: Container is not running
+            quiet: true
+        - name: Check that the RCON port is open (if enabled)
+          ansible.builtin.wait_for:
+            port: "{{ palworld_dedicated_server_rcon_port }}"
+            timeout: 30
+          when: palworld_dedicated_server_rcon_enable | default(False)

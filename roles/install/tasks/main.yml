@@ -76,15 +76,17 @@
   changed_when: false
   when: not ansible_check_mode
 
-- name: Start services
-  community.docker.docker_compose_v2:
-    project_src: "{{ palworld_dedicated_server_install_directory }}"
-    state: present  # Run 'docker compose up'.
-    pull: policy  # Follow the pull policy for each service defined in the compose file.
-    recreate: auto  # Only recreate the service when changes are detected in the compose file.
-
-- name: Wait until the RCON port is open (if enabled)
-  ansible.builtin.wait_for:
-    port: "{{ palworld_dedicated_server_rcon_port }}"
-    timeout: "{{ palworld_dedicated_server_rcon_wait_timeout }}"
-  when: palworld_dedicated_server_rcon_enable
+- name: Start services (When not running in Molecule using Docker)
+  when: not palworld_dedicated_server_molecule_docker
+  block:
+    - name: Start services
+      community.docker.docker_compose_v2:
+        project_src: "{{ palworld_dedicated_server_install_directory }}"
+        state: present  # Run 'docker compose up'.
+        pull: policy  # Follow the pull policy for each service defined in the compose file.
+        recreate: auto  # Only recreate the service when changes are detected in the compose file.
+    - name: Wait until the RCON port is open (if enabled)
+      ansible.builtin.wait_for:
+        port: "{{ palworld_dedicated_server_rcon_port }}"
+        timeout: "{{ palworld_dedicated_server_rcon_wait_timeout }}"
+      when: palworld_dedicated_server_rcon_enable

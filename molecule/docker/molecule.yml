@@ -11,17 +11,22 @@ driver:
 platforms:
   - name: palworld1
     image: ubuntu:22.04
-    privileged: true
     groups:
       - palworld
 
 provisioner:
   name: ansible
+  playbooks:
+    prepare: ../base/prepare.yml
+    converge: ../base/converge.yml
+    verify: ../base/verify.yml
   inventory:
     group_vars:
       palworld:
-        palworld_user_uid: 300
-        palworld_user_gid: 300
+        palworld_dedicated_server_molecule_testing: true
+        palworld_dedicated_server_molecule_docker: true
+        palworld_dedicated_server_user_uid: 300
+        palworld_dedicated_server_user_gid: 300
     host_vars:
       palworld1:
         palworld_dedicated_server_settings:
@@ -30,6 +35,9 @@ provisioner:
           ADMIN_PASSWORD: "123456"
           SERVER_PASSWORD: "123456"
           COMMUNITY_SERVER: false
+
+verifier:
+  name: ansible
 
 scenario:
   test_sequence:
@@ -40,19 +48,19 @@ scenario:
     - create
     - prepare
     - check
-    - check restart.yml
-    - check stop.yml
-    - check uninstall.yml
+    - check ../base/restart.yml
+    - check ../base/stop.yml
+    - check ../base/uninstall.yml
     - converge
     - idempotence
     - verify
-    - side_effect restart.yml
+    - side_effect ../base/restart.yml
     - verify
-    - side_effect stop.yml
-    - verify verify_stop.yml
-    - side_effect uninstall.yml
-    - verify verify_uninstall.yml
+    - side_effect ../base/stop.yml
+    - verify ../base/verify_stop.yml
+    - side_effect ../base/uninstall.yml
+    - verify ../base/verify_uninstall.yml
     # Run uninstall again to ensure it works even if already uninstalled.
-    - side_effect uninstall.yml
+    - side_effect ../base/uninstall.yml
     - cleanup
     - destroy
