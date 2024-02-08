@@ -32,7 +32,7 @@ services:
         - PGID={{ palworld_dedicated_server_temp_user_gid }}
 {% for key, value in palworld_dedicated_server_settings %}
 {% if key not in ["TZ", "PUID", "PGID"] %}
-{% if value is bool %}
+{% if value is boolean %}
         - {{ key }}={{ value | string | lower }}
 {% elif value is float %}
         - {{ key }}={{ '%0.6f' | format(value) }}
