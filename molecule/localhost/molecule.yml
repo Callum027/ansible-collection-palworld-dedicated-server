@@ -47,9 +47,6 @@ scenario:
     - dependency
     - syntax
     - check
-    - check ../base/restart.yml
-    - check ../base/stop.yml
-    - check ../base/uninstall.yml
     - converge
     - idempotence
     - verify
