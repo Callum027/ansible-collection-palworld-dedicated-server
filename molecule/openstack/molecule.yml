@@ -17,6 +17,7 @@ provisioner:
     prepare: ../base/prepare.yml
     converge: ../base/converge.yml
     verify: ../base/verify.yml
+    side_effect: ../base/restart.yml
   inventory:
     group_vars:
       palworld:
@@ -51,7 +52,7 @@ scenario:
     - converge
     - idempotence
     - verify
-    - side_effect ../base/restart.yml
+    - side_effect
     - verify
     - side_effect ../base/stop.yml
     - verify ../base/verify_stop.yml
