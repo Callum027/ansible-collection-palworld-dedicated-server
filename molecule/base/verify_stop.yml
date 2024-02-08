@@ -11,20 +11,20 @@
     - name: Check that the service user still has the correct UID
       ansible.builtin.assert:
         that:
-          - (getent_passwd['palworld'][1] | int) == palworld_user_uid
-        success_msg: "Service user has the correct UID {{ palworld_user_uid }}"
+          - (getent_passwd['palworld'][1] | int) == palworld_dedicated_server_user_uid
+        success_msg: "Service user has the correct UID {{ palworld_dedicated_server_user_uid }}"
         fail_msg: >-
           Service user has the incorrect UID {{ getent_passwd['palworld'][1] }},
-          expected {{ palworld_user_uid }}
+          expected {{ palworld_dedicated_server_user_uid }}
         quiet: true
     - name: Check that the service user still has the correct GID
       ansible.builtin.assert:
         that:
-          - (getent_passwd['palworld'][2] | int) == palworld_user_gid
-        success_msg: "Service user has the correct GID {{ palworld_user_uid }}"
+          - (getent_passwd['palworld'][2] | int) == palworld_dedicated_server_user_gid
+        success_msg: "Service user has the correct GID {{ palworld_dedicated_server_user_uid }}"
         fail_msg: >-
           Service user has the incorrect GID {{ getent_passwd['palworld'][2] }},
-          expected {{ palworld_user_gid }}
+          expected {{ palworld_dedicated_server_user_gid }}
         quiet: true
     - name: Check that data directory still exists
       ansible.builtin.stat:
