@@ -14,7 +14,7 @@
     name: "{{ palworld_dedicated_server_user_name }}"
     uid: "{{ palworld_dedicated_server_user_uid | default(omit, true) }}"
     group: "{{ palworld_dedicated_server_user_group }}"
-    groups: "{{ palworld_dedicated_server_additional_groups }}"
+    groups: "{{ palworld_dedicated_server_user_additional_groups }}"
     home: "{{ palworld_dedicated_server_install_directory }}"
     create_home: false
     shell: /usr/sbin/nologin
