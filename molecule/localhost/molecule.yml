@@ -5,10 +5,10 @@ dependency:
   options:
     requirements-file: requirements.yml
 
-platforms:
-  - name: localhost
+platforms:  # Required to be defined by Ansible, but not used.
+  - name: unused
     groups:
-      - palworld
+      - unused
 
 provisioner:
   name: ansible
@@ -17,10 +17,10 @@ provisioner:
     verify: ../base/verify.yml
     side_effect: ../base/restart.yml
   inventory:
-    # hosts:
-    #   palworld:
-    #     hosts:
-    #       localhost:
+    hosts:
+      palworld:
+        hosts:
+          localhost:
     group_vars:
       palworld:
         palworld_dedicated_server_molecule_testing: true
