@@ -74,6 +74,7 @@
     cmd: docker compose --file docker-compose.yml config --quiet
     chdir: "{{ palworld_dedicated_server_install_directory }}"
   changed_when: false
+  when: not ansible_check_mode
 
 - name: Start services
   community.docker.docker_compose_v2:
