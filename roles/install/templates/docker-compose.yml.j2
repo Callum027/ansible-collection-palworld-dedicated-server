@@ -22,7 +22,7 @@ services:
         mode: host
 {% if palworld_dedicated_server_rcon_enable %}
       - published: {{ palworld_dedicated_server_rcon_bind_address }}:{{ palworld_dedicated_server_public_port }}
-        target: 8211
+        target: 25575
         protocol: tcp
         mode: host
 {% endif %}

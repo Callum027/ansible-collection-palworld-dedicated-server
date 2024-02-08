@@ -2,3 +2,6 @@
 
 palworld_dedicated_server_image_uri: jammsen/palworld-dedicated-server
 palworld_dedicated_server_image_tag: latest
+
+# Can be set to 'always', to force container pulls on every run 'docker compose up'.
+palworld_dedicated_server_image_pull_policy: missing
