@@ -40,4 +40,4 @@
         name: docker
         state: started
         enabled: true
-      when: not palworld_dedicated_server_molecule_docker
+      when: not (palworld_dedicated_server_molecule_docker | default(False))

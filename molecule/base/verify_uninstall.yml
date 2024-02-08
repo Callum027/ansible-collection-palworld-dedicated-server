@@ -5,7 +5,7 @@
   become: true
   tasks:
     - name: Check service status (if not running in Molecule using Docker)
-      when: not palworld_dedicated_server_molecule_docker
+      when: not (palworld_dedicated_server_molecule_docker | default(False))
       block:
         - name: Get container info
           community.docker.docker_container_info:

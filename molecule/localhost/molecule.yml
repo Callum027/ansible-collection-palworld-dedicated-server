@@ -45,6 +45,7 @@ verifier:
 scenario:
   test_sequence:
     - dependency
+    - cleanup
     - syntax
     - check
     - converge
@@ -58,3 +59,4 @@ scenario:
     - verify ../base/verify_uninstall.yml
     # Run uninstall again to ensure it works even if already uninstalled.
     - side_effect ../base/uninstall.yml
+    - cleanup

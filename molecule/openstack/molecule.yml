@@ -28,8 +28,8 @@ provisioner:
     host_vars:
       ${CI_PREFIX}-palworld1:
         palworld_dedicated_server_settings:
-          SERVER_NAME: palworld1
-          SERVER_DESCRIPTION: Molecule test for Palworld Dedicated Server (palworld1)
+          SERVER_NAME: Palworld Dedicated Server Molecule Test
+          SERVER_DESCRIPTION: Molecule test for Palworld Dedicated Server
           ADMIN_PASSWORD: "123456"
           SERVER_PASSWORD: "123456"
           COMMUNITY_SERVER: false
