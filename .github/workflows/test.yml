@@ -4,8 +4,21 @@ on:
   pull_request:
 
 jobs:
-  test:
+  pre-commit:
     runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run pre-commit hooks
+        uses: pre-commit/action@v3.0.1
+
+  molecule:
+    runs-on: ubuntu-22.04
+    needs: pre-commit
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
