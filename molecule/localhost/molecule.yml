@@ -24,10 +24,6 @@ provisioner:
     verify: ../base/verify.yml
     side_effect: ../base/restart.yml
   inventory:
-    # hosts:
-    #   palworld:
-    #     hosts:
-    #       localhost:
     group_vars:
       palworld:
         palworld_dedicated_server_molecule_testing: true
@@ -49,8 +45,6 @@ verifier:
 scenario:
   test_sequence:
     - dependency
-    - cleanup
-    - destroy
     - syntax
     - check
     - check ../base/restart.yml

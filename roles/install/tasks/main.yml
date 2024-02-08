@@ -79,12 +79,18 @@
 - name: Start services (When not running in Molecule using Docker)
   when: not palworld_dedicated_server_molecule_docker
   block:
-    - name: Start services
+    - name: Check that the compose file exists (for check mode)
+      ansible.builtin.stat:
+        path: "{{ palworld_dedicated_server_install_directory }}/docker-compose.yml"
+      register: palworld_dedicated_server_temp_compose_file
+      failed_when: not ansible_check_mode and (palworld_dedicated_server_temp_compose_file.stat.isreg | default(False))
+    - name: Start services (skipped if in check mode and the compose file does not exist)
       community.docker.docker_compose_v2:
         project_src: "{{ palworld_dedicated_server_install_directory }}"
         state: present  # Run 'docker compose up'.
         pull: policy  # Follow the pull policy for each service defined in the compose file.
         recreate: auto  # Only recreate the service when changes are detected in the compose file.
+      when: not ansible_check_mode or (palworld_dedicated_server_temp_compose_file.stat.isreg | default(False))
     - name: Wait until the RCON port is open (if enabled)
       ansible.builtin.wait_for:
         port: "{{ palworld_dedicated_server_rcon_port }}"
