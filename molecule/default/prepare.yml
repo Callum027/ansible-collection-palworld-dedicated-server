@@ -4,25 +4,25 @@
   hosts: all
   become: true
   tasks:
-    - name: Set Debian package architecture name
+    - name: Fetch Debian package architecture name
       ansible.builtin.command: dpkg --print-architecture
       register: _dpkg_architecture
       changed_when: false
     - name: Set Debian package architecture name
       ansible.builtin.set_fact:
         dpkg_architecture: "{{ _dpkg_architecture.stdout }}"
-    - name: Install APT GPG key
-      ansible.builtin.copy:
-        src: docker.gpg
-        dest: /etc/apt/keyrings/docker.gpg
+    - name: Install Docker APT GPG key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
         owner: root
         group: root
         mode: "0644"
-    - name: Add APT repository
+    - name: Add Docker APT repository
       ansible.builtin.apt_repository:
         filename: docker
         repo: >-
-          deb [arch={{ dpkg_architecture }} signed-by=/etc/apt/keyrings/docker.gpg]
+          deb [arch={{ dpkg_architecture }} signed-by=/etc/apt/keyrings/docker.asc]
           https://download.docker.com/linux/{{ docker_distribution }}
           {{ docker_distribution_release }}
           stable
