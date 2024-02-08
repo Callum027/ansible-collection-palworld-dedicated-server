@@ -36,14 +36,30 @@
     mode: "0750"
 
 - name: Get service user metadata
-  ansible.builtin.getent:
-    database: passwd
-    key: "{{ palworld_dedicated_server_user_name }}"
-
-- name: Set service user UID and GID for templating
-  ansible.builtin.set_fact:
-    palworld_dedicated_server_temp_user_uid: "{{ getent_passwd['palworld'][1] | int }}"
-    palworld_dedicated_server_temp_user_gid: "{{ getent_passwd['palworld'][2] | int }}"
+  block:
+    - name: Get service user metadata
+      ansible.builtin.getent:
+        database: passwd
+        key: "{{ palworld_dedicated_server_user_name }}"
+      register: palworld_dedicated_server_temp_user_metadata
+    - name: Set service user UID and GID for templating
+      ansible.builtin.set_fact:
+        palworld_dedicated_server_temp_user_uid: "{{ getent_passwd['palworld'][1] | int }}"
+        palworld_dedicated_server_temp_user_gid: "{{ getent_passwd['palworld'][2] | int }}"
+  rescue:
+    - name: Fail if getting service user metadata failed, and not running in check mode
+      ansible.builtin.assert:
+        that:
+          - ansible_check_mode
+        success_msg: Service user does not exist, setting placeholder UID and GID for check mode
+        fail_msg: >-
+          Getting metadata for service user '{{ palworld_dedicated_server_user_name }}' failed,
+          check that the service user was created properly
+        quiet: true
+    - name: Set placeholder UID and GID (if in check mode, and service user does not exist)
+      ansible.builtin.set_fact:
+        palworld_dedicated_server_temp_user_uid: "{{ palworld_dedicated_server_user_uid | default(1234, true) }}"
+        palworld_dedicated_server_temp_user_gid: "{{ palworld_dedicated_server_user_gid | default(1234, true) }}"
 
 - name: Create compose file
   ansible.builtin.template:
