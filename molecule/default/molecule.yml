@@ -5,6 +5,9 @@ dependency:
   options:
     requirements-file: requirements.yml
 
+driver:
+  name: docker
+
 platforms:
   - name: palworld1
     image: ubuntu:22.04
