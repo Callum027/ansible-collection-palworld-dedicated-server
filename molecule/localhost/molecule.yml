@@ -5,6 +5,11 @@ dependency:
   options:
     requirements-file: requirements.yml
 
+platforms:
+  - name: localhost
+    groups:
+      - palworld
+
 provisioner:
   name: ansible
   playbooks:
@@ -12,10 +17,10 @@ provisioner:
     verify: ../base/verify.yml
     side_effect: ../base/restart.yml
   inventory:
-    hosts:
-      palworld:
-        hosts:
-          localhost:
+    # hosts:
+    #   palworld:
+    #     hosts:
+    #       localhost:
     group_vars:
       palworld:
         palworld_dedicated_server_molecule_testing: true
@@ -40,8 +45,6 @@ scenario:
     - cleanup
     - destroy
     - syntax
-    - create
-    - prepare
     - check
     - check ../base/restart.yml
     - check ../base/stop.yml
@@ -57,5 +60,3 @@ scenario:
     - verify ../base/verify_uninstall.yml
     # Run uninstall again to ensure it works even if already uninstalled.
     - side_effect ../base/uninstall.yml
-    - cleanup
-    - destroy
