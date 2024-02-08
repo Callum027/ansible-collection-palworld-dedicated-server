@@ -6,7 +6,7 @@
   tasks:
     - name: Delete the Palworld Dedicated Server container
       community.docker.docker_container:
-        name: palworld-dedicated-server_palworld-dedicated-server_1
+        name: palworld-dedicated-server
         state: absent
         force_kill: true
         keep_volumes: false

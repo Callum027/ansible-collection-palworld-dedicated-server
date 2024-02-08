@@ -28,6 +28,7 @@ provisioner:
         palworld_dedicated_server_molecule_docker: true
         palworld_dedicated_server_user_uid: 300
         palworld_dedicated_server_user_gid: 300
+        palworld_dedicated_server_container_name: palworld-dedicated-server
     host_vars:
       palworld1:
         palworld_dedicated_server_settings:

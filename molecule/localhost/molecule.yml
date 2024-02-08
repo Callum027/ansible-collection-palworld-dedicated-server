@@ -30,6 +30,7 @@ provisioner:
         palworld_dedicated_server_molecule_localhost: true
         palworld_dedicated_server_user_uid: 300
         palworld_dedicated_server_user_gid: 300
+        palworld_dedicated_server_container_name: palworld-dedicated-server
     host_vars:
       localhost:
         palworld_dedicated_server_settings:

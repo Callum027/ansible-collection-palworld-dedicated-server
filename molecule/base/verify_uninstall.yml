@@ -9,7 +9,7 @@
       block:
         - name: Get container info
           community.docker.docker_container_info:
-            name: palworld-dedicated-server_palworld-dedicated-server_1
+            name: palworld-dedicated-server
           register: result
         - name: Check that the container does not exist
           ansible.builtin.assert:
