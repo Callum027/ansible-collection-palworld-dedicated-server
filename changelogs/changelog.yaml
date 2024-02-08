@@ -1,0 +1,9 @@
+ancestor: null
+releases:
+  1.0.0:
+    changes:
+      release_summary: Initial release of the Ansible collection for Palworld Dedicated
+        Server.
+    fragments:
+    - 1.0.0.yaml
+    release_date: '2024-02-08'

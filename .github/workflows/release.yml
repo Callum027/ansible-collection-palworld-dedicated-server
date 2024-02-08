@@ -1,0 +1,17 @@
+name: release
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  release:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout release
+        uses: actions/checkout@v4
+      - name: Build and publish to Ansible Galaxy
+        uses: artis3n/ansible_galaxy_collection@v2
+        with:
+          api_key: ${{ secrets.ANSIBLE_GALAXY_API_KEY }}

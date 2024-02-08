@@ -1,0 +1,27 @@
+---
+
+- name: Set common default variables
+  ansible.builtin.import_role:
+    name: common
+
+- name: Destroy services
+  community.docker.docker_compose_v2:
+    project_src: "{{ palworld_dedicated_server_install_directory }}"
+    state: absent  # Run 'docker compose down'.
+    remove_orphans: true  # Remove orphan services (not defined in the compose file).
+    remove_images: all  # Remove all images used by the compose file, if unused.
+
+- name: Delete install directory
+  ansible.builtin.file:
+    path: "{{ palworld_dedicated_server_install_directory }}"
+    state: absent
+
+- name: Delete service user
+  ansible.builtin.user:
+    name: "{{ palworld_dedicated_server_user_name }}"
+    state: absent
+
+- name: Delete service group
+  ansible.builtin.group:
+    name: "{{ palworld_dedicated_server_user_group }}"
+    state: absent

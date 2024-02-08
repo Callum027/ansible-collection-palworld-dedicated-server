@@ -1,0 +1,10 @@
+---
+
+palworld_dedicated_server_user_name: palworld
+palworld_dedicated_server_user_group: palworld
+
+palworld_dedicated_server_user_additional_groups: []
+
+# Set these variables if you want a specific UID/GID for the Palworld user.
+# palworld_dedicated_server_user_uid: 300
+# palworld_dedicated_server_user_gid: 300

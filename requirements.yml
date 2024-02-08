@@ -1,0 +1,7 @@
+---
+# requirements.yml
+# Ansible role and collection dependencies for Molecule testing.
+
+collections:
+  - name: community.docker
+    version: 3.7.0

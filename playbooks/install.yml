@@ -1,0 +1,7 @@
+---
+
+- name: Install Palworld Dedicated Server
+  hosts: palworld
+  become: true
+  roles:
+    - callum027.palworld_dedicated_server.install

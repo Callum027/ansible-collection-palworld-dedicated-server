@@ -1,0 +1,25 @@
+---
+
+# When setting a value here, **make sure the type of the value is correct in Ansible**,
+# as the compose file template converts the value to an environment variable definition.
+#
+# Here are a few examples:
+#
+# palworld_dedicated_server_settings:
+#   ALWAYS_UPDATE_ON_START: true  # Boolean type
+#   GUILD_PLAYER_MAX_NUM: 20  # Integer type
+#   PAL_CAPTURE_RATE: 1.0  # Float type
+#   SERVER_NAME: 'Example Server'  # String type
+#
+# The following values are either **required** or recommended to be changed:
+#
+#   * SERVER_NAME - Name of the Palworld Dedicated Server as shown in Palworld (**required**)
+#   * ADMIN_PASSWORD - Administrator password for the server (**required**)
+#   * SERVER_PASSWORD - Set the password required to access the server, or set to a blank string to not require a password (**required**)
+#   * SERVER_DESCRIPTION - Description of the server when viewed from Palworld (recommended)
+#   * PUBLIC_IP - Public IP address of the server, as accessible from the Internet (recommended)
+#   * COMMUNITY_SERVER - Set to true if this is a community server, and false if it is a private server (recommended)
+#
+# For more information on the available values, check default.env in the container repository:
+# https://github.com/jammsen/docker-palworld-dedicated-server/blob/master/default.env
+# palworld_dedicated_server_settings: {}

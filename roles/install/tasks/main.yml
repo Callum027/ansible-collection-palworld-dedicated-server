@@ -1,0 +1,73 @@
+---
+
+- name: Set common default variables
+  ansible.builtin.import_role:
+    name: common
+
+- name: Create service group
+  ansible.builtin.group:
+    name: "{{ palworld_dedicated_server_user_group }}"
+    gid: "{{ mediastack_user_gid | default(omit, true) }}"
+
+- name: Create service user
+  ansible.builtin.user:
+    name: "{{ palworld_dedicated_server_user_name }}"
+    uid: "{{ palworld_dedicated_server_user_uid | default(omit, true) }}"
+    group: "{{ palworld_dedicated_server_group }}"
+    groups: "{{ palworld_dedicated_server_additional_groups }}"
+    home: "{{ palworld_dedicated_server_install_directory }}"
+    create_home: false
+    shell: /usr/sbin/nologin
+
+- name: Create install directory
+  ansible.builtin.file:
+    path: "{{ palworld_dedicated_server_install_directory }}"
+    state: directory
+    owner: root
+    group: docker
+    mode: "0750"
+
+- name: Create data directory
+  ansible.builtin.file:
+    path: "{{ palworld_dedicated_server_install_directory }}/data"
+    state: directory
+    owner: "{{ palworld_dedicated_server_user_name }}"
+    group: "{{ palworld_dedicated_server_user_group }}"
+    mode: "0750"
+
+- name: Get service user metadata
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ palworld_dedicated_server_user_name }}"
+
+- name: Set service user UID and GID for templating
+  ansible.builtin.set_fact:
+    palworld_dedicated_server_temp_user_uid: "{{ getent_passwd['palworld'][1] | int }}"
+    palworld_dedicated_server_temp_user_gid: "{{ getent_passwd['palworld'][2] | int }}"
+
+- name: Create compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ palworld_dedicated_server_install_directory }}/docker-compose.yml"
+    owner: root
+    group: docker
+    mode: "0640"
+
+- name: Validate compose file
+  ansible.builtin.command:
+    cmd: docker compose --file docker-compose.yml config --quiet
+    chdir: "{{ palworld_dedicated_server_install_directory }}"
+  changed_when: false
+
+- name: Start services
+  community.docker.docker_compose_v2:
+    project_src: "{{ palworld_dedicated_server_install_directory }}"
+    state: present  # Run 'docker compose up'.
+    pull: policy  # Follow the pull policy for each service defined in the compose file.
+    recreate: auto  # Only recreate the service when changes are detected in the compose file.
+
+- name: Wait until the RCON port is open (if enabled)
+  ansible.builtin.wait_for:
+    port: "{{ palworld_dedicated_server_rcon_port }}"
+    timeout: "{{ palworld_dedicated_server_rcon_wait_timeout }}"
+  when: palworld_dedicated_server_rcon_enable

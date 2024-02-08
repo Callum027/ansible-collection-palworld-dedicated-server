@@ -1,0 +1,39 @@
+---
+
+- name: Check that Palworld Dedicated Server has been uninstalled
+  hosts: palworld
+  become: true
+  tasks:
+    - name: Get container info
+      community.docker.docker_container_info:
+        name: palworld-dedicated-server_palworld-dedicated-server_1
+      register: result
+    - name: Check that the container does not exist
+      ansible.builtin.assert:
+        that:
+          - not result.exists
+        success_msg: Container does not exist
+        fail_msg: Container exists
+        quiet: true
+    - name: Check that the install directory does not exist
+      ansible.builtin.stat:
+        path: /opt/palworld
+      register: install_dir
+      failed_when: install_dir.stat.exists | default(False)
+    - name: Get service user metadata
+      ansible.builtin.getent:
+        database: passwd
+    - name: Check that the service user does not exist
+      ansible.builtin.assert:
+        that:
+          - "'palworld' not in getent_passwd"
+        success_msg: Service user does not exist
+        fail_msg: Service user exists
+        quiet: true
+    - name: Check that the service group does not exist
+      ansible.builtin.assert:
+        that:
+          - "'palworld' not in getent_group"
+        success_msg: Service group does not exist
+        fail_msg: Service group exists
+        quiet: true
