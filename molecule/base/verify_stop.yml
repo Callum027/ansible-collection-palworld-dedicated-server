@@ -33,7 +33,7 @@
       failed_when: not (data_dir.stat.isdir | default(False))
     - name: Check that the compose file still exists
       ansible.builtin.stat:
-        path: /docker/compose/distil/api/docker-compose.yml
+        path: /opt/palworld/docker-compose.yml
       register: dockercompose_file
       failed_when: not (dockercompose_file.stat.isreg | default(False))
     - name: Check service status (if not running in Molecule using Docker)

@@ -7,7 +7,7 @@
 - name: Create service group
   ansible.builtin.group:
     name: "{{ palworld_dedicated_server_user_group }}"
-    gid: "{{ mediastack_user_gid | default(omit, true) }}"
+    gid: "{{ palworld_dedicated_server_user_gid | default(omit, true) }}"
 
 - name: Create service user
   ansible.builtin.user:
