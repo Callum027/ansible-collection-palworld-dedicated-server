@@ -5,9 +5,6 @@ dependency:
   options:
     requirements-file: requirements.yml
 
-driver:
-  name: delegated
-
 provisioner:
   name: ansible
   playbooks:
