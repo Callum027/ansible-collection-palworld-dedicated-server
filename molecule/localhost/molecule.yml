@@ -5,10 +5,12 @@ dependency:
   options:
     requirements-file: requirements.yml
 
-platforms:  # Required to be defined by Ansible, but not used.
-  - name: unused
-    groups:
-      - unused
+driver:
+  name: default
+  options:
+    managed: false
+    ansible_connection_options:
+      ansible_connection: local
 
 provisioner:
   name: ansible
