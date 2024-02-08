@@ -24,3 +24,5 @@ jobs:
         run: pre-commit run --show-diff-on-failure --color=always --all-files
       - name: Run Molecule tests
         run: molecule test --scenario-name localhost
+        env:
+          ANSIBLE_FORCE_COLOR: "True"
