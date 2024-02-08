@@ -9,13 +9,16 @@ jobs:
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
-      - name: Setup Python
+      - name: Setup Python and required pip packages
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+      - name: Setup Docker Compose
+        uses: KengoTODA/actions-setup-docker-compose@v1
+        with:
+          version: "2.24.5"
       - name: Run pre-commit hooks
         uses: pre-commit/action@v3.0.1
-      - name: Run Molecule tests using Docker
-        uses: gofrolist/molecule-action@v2
-        with:
-          molecule_args: --scenario-name docker
+      - name: Run Molecule tests
+        run: molecule test --scenario-name localhost

@@ -3,4 +3,5 @@
 palworld_dedicated_server_molecule_testing: false
 
 palworld_dedicated_server_molecule_docker: false
+palworld_dedicated_server_molecule_localhost: false
 palworld_dedicated_server_molecule_openstack: false
