@@ -1,0 +1,23 @@
+---
+
+namespace: callum027
+name: palworld_dedicated_server
+version: 1.0.0
+authors:
+  - Callum Dickinson <callum.dickinson.nz@gmail.com>
+
+description: A collection for installing and managing a containerised Palworld Dedicated Server.
+readme: README.md
+license:
+  - GPL-3.0-or-later
+
+tags:
+  - application
+  - palworld
+  - palworld-dedicated-server
+
+dependencies:
+  community.docker: ">=3.6.0"
+
+repository: http://github.com/Callum027/ansible-collection-palworld-dedicated-server
+issues: http://github.com/Callum027/ansible-collection-palworld-dedicated-server/issues

@@ -1,0 +1,4 @@
+---
+
+- name: Install Palworld Dedicated Server
+  ansible.builtin.import_playbook: callum027.palworld_dedicated_server.install

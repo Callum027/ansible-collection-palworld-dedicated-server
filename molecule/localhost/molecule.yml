@@ -1,0 +1,69 @@
+---
+
+dependency:
+  name: galaxy
+  options:
+    requirements-file: requirements.yml
+
+driver:
+  name: default
+  options:
+    managed: false
+    ansible_connection_options:
+      ansible_connection: local
+
+platforms:
+  - name: localhost
+    groups:
+      - palworld
+
+provisioner:
+  name: ansible
+  playbooks:
+    converge: ../base/converge.yml
+    verify: ../base/update.yml
+    side_effect: ../base/restart.yml
+  inventory:
+    group_vars:
+      palworld:
+        palworld_dedicated_server_molecule_testing: true
+        palworld_dedicated_server_molecule_localhost: true
+        palworld_dedicated_server_container_name: palworld-dedicated-server
+    host_vars:
+      localhost:
+        palworld_dedicated_server_settings:
+          SERVER_NAME: Palworld Dedicated Server Molecule Test
+          SERVER_DESCRIPTION: Molecule test for Palworld Dedicated Server
+          ADMIN_PASSWORD: "123456"
+          SERVER_PASSWORD: "123456"
+          COMMUNITY_SERVER: false
+
+verifier:
+  name: ansible
+
+scenario:
+  test_sequence:
+    - dependency
+    - cleanup
+    - syntax
+    - check
+    - converge
+    - idempotence
+    - verify
+    - side_effect
+    - verify
+    - side_effect ../base/restart.yml
+    - verify
+    - side_effect ../base/stop.yml
+    - verify ../base/verify_stop.yml
+    - converge
+    - verify
+    - side_effect ../base/disable.yml
+    - verify ../base/verify_disable.yml
+    - converge
+    - verify
+    - side_effect ../base/uninstall.yml
+    - verify ../base/verify_uninstall.yml
+    # Run uninstall again to ensure it works even if already uninstalled.
+    - side_effect ../base/uninstall.yml
+    - cleanup

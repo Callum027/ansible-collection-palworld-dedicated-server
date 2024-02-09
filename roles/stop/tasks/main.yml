@@ -1,0 +1,10 @@
+---
+
+- name: Set common default variables
+  ansible.builtin.import_role:
+    name: common
+
+- name: Stop services
+  community.docker.docker_compose_v2:
+    project_src: "{{ palworld_dedicated_server_install_directory }}"
+    state: stopped  # Run 'docker compose stop'.

@@ -1,0 +1,46 @@
+---
+
+version: "3.7"
+
+services:
+  palworld-dedicated-server:
+    image: '{{ palworld_dedicated_server_image_uri }}:{{ palworld_dedicated_server_image_tag }}'
+    pull_policy: '{{ palworld_dedicated_server_image_pull_policy }}'
+    restart: always
+{% if palworld_dedicated_server_container_name %}
+    container_name: '{{ palworld_dedicated_server_container_name }}'
+{% endif %}
+    volumes:
+      - type: bind
+        source: ./data
+        target: /palworld
+        read_only: false
+    ports:
+      - published: {{ palworld_dedicated_server_public_port }}
+        target: 8211
+        protocol: udp
+        mode: host
+{% if palworld_dedicated_server_rcon_enable %}
+      - published: {{ palworld_dedicated_server_rcon_bind_address }}:{{ palworld_dedicated_server_public_port }}
+        target: 25575
+        protocol: tcp
+        mode: host
+{% endif %}
+    environment:
+      - TZ={{ palworld_dedicated_server_container_timezone }}
+      - PUID=1000
+      - PGID=1000
+      - SERVER_SETTINGS_MODE=auto
+      - RCON_ENABLED={{ palworld_dedicated_server_rcon_enable | string | lower }}
+      - RCON_PORT={{ palworld_dedicated_server_rcon_port }}
+{% for key, value in palworld_dedicated_server_settings.items() %}
+{% if key not in ["TZ", "PUID", "PGID", "SERVER_SETTINGS_MODE", "RCON_ENABLED", "RCON_PORT"] %}
+{% if value is boolean %}
+      - {{ key }}={{ value | string | lower }}
+{% elif value is float %}
+      - {{ key }}={{ '%0.6f' | format(value) }}
+{% else %}
+      - {{ key }}={{ value }}
+{% endif %}
+{% endif %}
+{% endfor %}

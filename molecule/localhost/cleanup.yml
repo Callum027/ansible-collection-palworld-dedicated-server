@@ -1,0 +1,12 @@
+---
+
+- name: Destroy Palworld Dedicated Server container
+  hosts: palworld
+  become: true
+  tasks:
+    - name: Destroy the Palworld Dedicated Server container
+      community.docker.docker_container:
+        name: palworld-dedicated-server
+        state: absent
+        force_kill: true
+        keep_volumes: false

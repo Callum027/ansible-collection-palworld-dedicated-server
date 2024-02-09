@@ -1,0 +1,44 @@
+name: test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run pre-commit hooks
+        uses: pre-commit/action@v3.0.1
+
+  molecule:
+    runs-on: ubuntu-22.04
+    needs: pre-commit
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+      - name: Setup Docker Compose
+        uses: KengoTODA/actions-setup-docker-compose@v1
+        with:
+          version: "2.24.5"
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install Python packages used for testing
+        run: python -m pip install -r requirements.txt
+        env:
+          FORCE_COLOR: "1"
+      - name: Run Molecule tests
+        run: molecule test --scenario-name localhost
+        env:
+          ANSIBLE_FORCE_COLOR: "True"

@@ -1,0 +1,11 @@
+---
+
+- name: Install Palworld Dedicated Server (recreate containers if updates are available)
+  ansible.builtin.import_role:
+    name: install
+  vars:
+    palworld_dedicated_server_temp_pull_policy: always
+
+- name: Nullify temporary pull policy variable
+  ansible.builtin.set_fact:
+    palworld_dedicated_server_temp_pull_policy: null
