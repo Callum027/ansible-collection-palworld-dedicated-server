@@ -21,13 +21,3 @@
   ansible.builtin.file:
     path: "{{ palworld_dedicated_server_install_directory }}"
     state: absent
-
-- name: Delete service user
-  ansible.builtin.user:
-    name: "{{ palworld_dedicated_server_user_name }}"
-    state: absent
-
-- name: Delete service group
-  ansible.builtin.group:
-    name: "{{ palworld_dedicated_server_user_group }}"
-    state: absent

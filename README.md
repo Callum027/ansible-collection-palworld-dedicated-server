@@ -108,16 +108,17 @@ The following variables are also available, with sane defaults already set. They
 * `palworld_dedicated_server_image_tag` - The image tag to install. Default is `latest`.
 * `palworld_dedicated_server_image_pull_policy` - The standard image pull policy to set when starting the service using Docker Compose. Set to `always` to always pull the latest version of the image before starting. Default is `missing` (pull the latest version of the image only if it is missing).
 * `palworld_dedicated_server_install_directory` - The target directory to install the compose file and service data folders to. Default is `/opt/palworld-dedicated-server`.
+* `palworld_dedicated_server_install_directory_owner` - Owning user of the install directory. Default is `root`.
+* `palworld_dedicated_server_install_directory_group` - Assigned group of the install directory. You may want to set this to `docker` to give all users that can run Docker read access to the compose file. Default is `root`.
+* `palworld_dedicated_server_install_directory_mode` - Permissions for the install directory. Default is `"0750"`.
+* `palworld_dedicated_server_install_compose_file_owner` - Owning user of the compose file. Default is to use the value set for the install directory.
+* `palworld_dedicated_server_install_compose_file_group` - Assigned group of the compose file. Default is to use the value set for the install directory.
+* `palworld_dedicated_server_install_compose_file_mode` - Permissions for the compose file. Default is to use the value set for the install directory.
 * `palworld_dedicated_server_public_port` - The port to expose for connecting to the Palworld Dedicated Server. Default is `8211`.
 * `palworld_dedicated_server_rcon_enable` - When set to `true`, enable RCON port access to the Palworld Dedicated Server. Default is `false`.
 * `palworld_dedicated_server_rcon_bind_address` - Bind address for the RCON port. Set to `0.0.0.0` to allow access from other hosts on the network. Default is `127.0.0.1`.
 * `palworld_dedicated_server_rcon_port` - RCON access port. Default is `25575`.
 * `palworld_dedicated_server_rcon_wait_timeout` - Timeout for waiting for the RCON port to come online after the container starts, in seconds. This may need to be increased if the host's Internet connection is slow (as on the first run, the container takes a while to download Palworld after it starts). Default is `600`.
-* `palworld_dedicated_server_user_name` - Name of the service user to create. Default is `palworld`.
-* `palworld_dedicated_server_user_group` - Group name for the service user (created if it does not exist). Default is `palworld`.
-* `palworld_dedicated_server_user_additional_groups` - List of additional groups to assign the service user to. Default is `[]` (do not assign any additional groups).
-* `palworld_dedicated_server_user_uid` - Set a specific UID to use for the service user. Default is to let the operating system auto-generate it.
-* `palworld_dedicated_server_user_gid` - Set a specific GID to use for the service group. Default is to let the operating system auto-generate it.
 
 ## Playbooks
 
@@ -129,7 +130,7 @@ are part of the `palworld` host group in the Ansible inventory.
 
 ### `callum027.palworld_dedicated_server.install`
 
-This playbook creates the service users, directories and files for Palworld Dedicated Server,
+This playbook creates the files and directories for Palworld Dedicated Server,
 starts the server, and configures it to run on startup.
 
 ```bash
@@ -200,7 +201,7 @@ ansible-playbook -i <path to inventory> callum027.palworld_dedicated_server.disa
 ### `callum027.palworld_dedicated_server.uninstall`
 
 This stops the Palworld Dedicated Server instance (if running),
-and completely removes all containers, service users, and files related to
+and completely removes all containers, and files related to
 Palworld Dedicated Server from the target hosts.
 
 **This playbook will irrecoverably remove Palworld Dedicated Server and the save data

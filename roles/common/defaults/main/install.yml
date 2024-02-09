@@ -1,3 +1,10 @@
 ---
 
 palworld_dedicated_server_install_directory: /opt/palworld-dedicated-server
+palworld_dedicated_server_install_directory_owner: root
+palworld_dedicated_server_install_directory_group: root
+palworld_dedicated_server_install_directory_mode: "0750"
+
+palworld_dedicated_server_install_compose_file_owner: "{{ palworld_dedicated_server_install_directory_owner }}"
+palworld_dedicated_server_install_compose_file_group: "{{ palworld_dedicated_server_install_directory_group  }}"
+palworld_dedicated_server_install_compose_file_mode: "{{ palworld_dedicated_server_install_directory_mode }}"
