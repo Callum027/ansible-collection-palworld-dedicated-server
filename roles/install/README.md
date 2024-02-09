@@ -1,4 +1,4 @@
-# `callum027.palworld_dedicated_server.stop`
+# `callum027.palworld_dedicated_server.install`
 
 This playbook creates the files and directories for Palworld Dedicated Server,
 starts the server, and configures it to run on startup.

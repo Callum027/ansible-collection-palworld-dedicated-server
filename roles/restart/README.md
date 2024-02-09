@@ -1,4 +1,4 @@
-# `callum027.palworld_dedicated_server.stop`
+# `callum027.palworld_dedicated_server.restart`
 
 This playbook restarts the Palworld Dedicated Service service container,
 without recreating it or modifying it in any way.
