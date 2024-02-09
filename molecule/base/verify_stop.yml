@@ -28,12 +28,12 @@
         quiet: true
     - name: Check that data directory still exists
       ansible.builtin.stat:
-        path: /opt/palworld/data
+        path: /opt/palworld-dedicated-server/data
       register: data_dir
       failed_when: not (data_dir.stat.isdir | default(False))
     - name: Check that the compose file still exists
       ansible.builtin.stat:
-        path: /opt/palworld/docker-compose.yml
+        path: /opt/palworld-dedicated-server/docker-compose.yml
       register: dockercompose_file
       failed_when: not (dockercompose_file.stat.isreg | default(False))
     - name: Check service status (if not running in Molecule using Docker)

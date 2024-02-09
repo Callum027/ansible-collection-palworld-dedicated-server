@@ -27,7 +27,7 @@ The following applications are required to be installed and running on target ho
 
 The following file structure is created by the Ansible collection on the target host.
 
-* `/opt/palworld` - Palworld install directory (configurable)
+* `/opt/palworld-dedicated-server` - Palworld install directory (configurable)
     * `data` - Palworld data directory, mounted into the container (Steam binaries, game configuration, world save data)
     * `docker-compose.yml` - Compose file (service container configuration)
 
@@ -104,8 +104,8 @@ The following variables are also available, with sane defaults already set. They
 * `palworld_dedicated_server_container_timezone` - Container timezone, used for timekeeping and logging. Default is `Etc/UTC`.
 * `palworld_dedicated_server_image_uri` - The URI for the image to install. Default is [`jammsen/palworld-dedicated-server`](https://hub.docker.com/r/jammsen/palworld-dedicated-server). **As this collection is designed around this image, this should not be changed.**
 * `palworld_dedicated_server_image_tag` - The image tag to install. Default is `latest`.
-* `palworld_dedicated_server_image_pull_policy`` Default is `missing` (pull the container only if it is missing).
-* `palworld_dedicated_server_install_directory` - The target directory to install the compose file and service data folders to. Default is `/opt/palworld`.
+* `palworld_dedicated_server_image_pull_policy` - The standard image pull policy to set when starting the service using Docker Compose. Set to `always` to always pull the latest version of the image before starting. Default is `missing` (pull the latest version of the image only if it is missing).
+* `palworld_dedicated_server_install_directory` - The target directory to install the compose file and service data folders to. Default is `/opt/palworld-dedicated-server`.
 * `palworld_dedicated_server_public_port` - The port to expose for connecting to the Palworld Dedicated Server. Default is `8211`.
 * `palworld_dedicated_server_rcon_enable` - When set to `true`, enable RCON port access to the Palworld Dedicated Server. Default is `false`.
 * `palworld_dedicated_server_rcon_bind_address` - Bind address for the RCON port. Set to `0.0.0.0` to allow access from other hosts on the network. Default is `127.0.0.1`.
@@ -140,7 +140,7 @@ run the following command on the host (as a superuser, or user that is a member 
 to look at the service logs:
 
 ```bash
-cd /opt/palworld && docker compose logs -f palworld-dedicated-server
+cd /opt/palworld-dedicated-server && docker compose logs -f palworld-dedicated-server
 ```
 
 ### `callum027.palworld_dedicated_server.update`
@@ -168,7 +168,7 @@ Once the playbook has finished, keep an eye on Palworld update process
 using the following command on the host:
 
 ```bash
-cd /opt/palworld && docker compose logs -f palworld-dedicated-server
+cd /opt/palworld-dedicated-server && docker compose logs -f palworld-dedicated-server
 ```
 
 ### `callum027.palworld_dedicated_server.stop`
@@ -215,6 +215,7 @@ The following Ansible roles are provided. These roles perform the tasks run by t
 Using the roles directly allows you to run them on any host, or include them as part of another play.
 
 * `callum027.palworld_dedicated_server.install`
+* `callum027.palworld_dedicated_server.update`
 * `callum027.palworld_dedicated_server.restart`
 * `callum027.palworld_dedicated_server.stop`
 * `callum027.palworld_dedicated_server.disable`

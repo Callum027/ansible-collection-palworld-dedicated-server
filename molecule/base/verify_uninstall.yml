@@ -20,7 +20,7 @@
             quiet: true
     - name: Check that the install directory does not exist
       ansible.builtin.stat:
-        path: /opt/palworld
+        path: /opt/palworld-dedicated-server
       register: install_dir
       failed_when: install_dir.stat.exists | default(False)
     - name: Get user metadata
