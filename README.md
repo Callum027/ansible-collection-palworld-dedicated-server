@@ -11,8 +11,11 @@ This collection should make it easier to bring Palworld Dedicated Server
 under configuration management on dedicated hardware or an IaaS cloud instance,
 which is a recommended way of running Palworld as it is very resource intensive.
 
-Palworld Dedicated Server will be run as a Docker container on a standard machine,
-managed by Docker Compose.
+Palworld Dedicated Server is configured to run as a Docker container on a standard machine,
+managed by Docker Compose. The Docker container used is
+[`jammsen/palworld-dedicated-server`](https://github.com/jammsen/docker-palworld-dedicated-server),
+a regularly maintained container for Palworld Dedicated Server with strong community support,
+that eliminates the usual manual setup steps required for configuring Palworld.
 
 ## Requirements
 
@@ -68,7 +71,7 @@ palworld_dedicated_server_settings:
 ```
 
 For more information on the available options, refer to the
-[environment variable documentation](https://github.com/jammsen/docker-palworld-dedicated-server/blob/master/default.env).
+[environment variable documentation](https://github.com/jammsen/docker-palworld-dedicated-server/blob/master/README_ENV.md).
 
 When setting a value here, **make sure the type of the value is correct in Ansible**,
 as the compose file template converts the values to environment variable definitions.

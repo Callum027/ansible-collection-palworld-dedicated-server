@@ -1,4 +1,4 @@
-# `callum027.palworld_dedicated_server.stop`
+# `callum027.palworld_dedicated_server.disable`
 
 This stops the Palworld Dedicated Server service container, and deletes it
 so it cannot run on startup.
