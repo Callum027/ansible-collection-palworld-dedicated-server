@@ -1,0 +1,11 @@
+---
+
+release_summary: |
+  This release contains updates to the documentation, giving more detail about the container
+  used by the collection, and configuring it with Palworld game settings.
+  The role README file titles have also been fixed to refer to the correct respective roles.
+
+  No functional changes have been made.
+
+trivial:
+  - Documentation improvements (`#5 <https://github.com/Callum027/ansible-collection-palworld-dedicated-server/pull/5>`_)
