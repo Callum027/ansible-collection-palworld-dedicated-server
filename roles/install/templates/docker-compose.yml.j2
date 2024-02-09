@@ -30,8 +30,9 @@ services:
         - TZ={{ palworld_dedicated_server_container_timezone }}
         - PUID={{ palworld_dedicated_server_temp_user_uid }}
         - PGID={{ palworld_dedicated_server_temp_user_gid }}
+        - SERVER_SETTINGS_MODE=auto
 {% for key, value in palworld_dedicated_server_settings.items() %}
-{% if key not in ["TZ", "PUID", "PGID"] %}
+{% if key not in ["TZ", "PUID", "PGID", "SERVER_SETTINGS_MODE"] %}
 {% if value is boolean %}
         - {{ key }}={{ value | string | lower }}
 {% elif value is float %}

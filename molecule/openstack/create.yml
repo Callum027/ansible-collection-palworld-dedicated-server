@@ -6,7 +6,7 @@
 
   vars:
     ssh_port: 22
-    ci_prefix: "{{ lookup('env', 'CI_PREFIX', default='molecule-callum027.palworld_dedicated_server') }}"
+    ci_prefix: "{{ lookup('env', 'CI_PREFIX', default='molecule-callum027-palworld_dedicated_server') }}"
     keypair_name: "{{ ci_prefix | replace('.', '_') }}"
     keypair_path: "{{ lookup('env', 'MOLECULE_EPHEMERAL_DIRECTORY') }}/ssh_key"
     security_group_name: "{{ ci_prefix }}"

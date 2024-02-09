@@ -1,5 +1,7 @@
 # Palworld Dedicated Server Collection for Ansible
 
+![GitHub License](https://img.shields.io/github/license/Callum027/ansible-collection-palworld-dedicated-server) ![GitHub Release](https://img.shields.io/github/v/release/Callum027/ansible-collection-palworld-dedicated-server) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Callum027/ansible-collection-palworld-dedicated-server/test.yml?label=tests)
+
 This is an Ansible collection for deploying and managing
 [Palworld Dedicated Server](https://tech.palworldgame.com/dedicated-server-guide),
 a dedicated server application for [Palworld](https://www.pocketpair.jp/palworld), a popular

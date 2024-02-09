@@ -5,7 +5,7 @@
   gather_facts: false
 
   vars:
-    ci_prefix: "{{ lookup('env', 'CI_PREFIX', default='molecule-callum027.palworld_dedicated_server') }}"
+    ci_prefix: "{{ lookup('env', 'CI_PREFIX', default='molecule-callum027-palworld_dedicated_server') }}"
     keypair_name: "{{ ci_prefix | replace('.', '_') }}"
     security_group_name: "{{ ci_prefix }}"
     network_name: "{{ ci_prefix }}"
@@ -47,7 +47,7 @@
     # this will allow more time to really get rid of the instances.
     - name: Try really hard to delete any remaining instances
       openstack.cloud.server:
-        name: "{{ item.instance_id }}"
+        name: "{{ item.instance_id | default(item.name) }}"
         state: absent
         delete_fip: true
       register: server
