@@ -7,3 +7,20 @@ releases:
     fragments:
     - 1.0.0.yaml
     release_date: '2024-02-08'
+  1.0.1:
+    changes:
+      release_summary: 'This release contains updates to the documentation, giving
+        more detail about the container
+
+        used by the collection, and configuring it with Palworld game settings.
+
+        The role README file titles have also been fixed to refer to the correct respective
+        roles.
+
+
+        No functional changes have been made.
+
+        '
+    fragments:
+    - 1.0.1.yaml
+    release_date: '2024-02-10'
