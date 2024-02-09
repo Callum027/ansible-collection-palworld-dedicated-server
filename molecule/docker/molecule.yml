@@ -19,7 +19,7 @@ provisioner:
   playbooks:
     prepare: ../base/prepare.yml
     converge: ../base/converge.yml
-    verify: ../base/verify.yml
+    verify: ../base/update.yml
     side_effect: ../base/restart.yml
   inventory:
     group_vars:
@@ -55,8 +55,16 @@ scenario:
     - verify
     - side_effect
     - verify
+    - side_effect ../base/restart.yml
+    - verify
     - side_effect ../base/stop.yml
     - verify ../base/verify_stop.yml
+    - converge
+    - verify
+    - side_effect ../base/disable.yml
+    - verify ../base/verify_disable.yml
+    - converge
+    - verify
     - side_effect ../base/uninstall.yml
     - verify ../base/verify_uninstall.yml
     # Run uninstall again to ensure it works even if already uninstalled.

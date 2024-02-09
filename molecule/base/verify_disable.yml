@@ -1,0 +1,52 @@
+---
+
+- name: Check that Palworld Dedicated Server has been disabled
+  hosts: palworld
+  become: true
+  tasks:
+    - name: Get service user metadata
+      ansible.builtin.getent:
+        database: passwd
+        key: palworld
+    - name: Check that the service user still has the correct UID
+      ansible.builtin.assert:
+        that:
+          - (getent_passwd['palworld'][1] | int) == palworld_dedicated_server_user_uid
+        success_msg: "Service user has the correct UID {{ palworld_dedicated_server_user_uid }}"
+        fail_msg: >-
+          Service user has the incorrect UID {{ getent_passwd['palworld'][1] }},
+          expected {{ palworld_dedicated_server_user_uid }}
+        quiet: true
+    - name: Check that the service user still has the correct GID
+      ansible.builtin.assert:
+        that:
+          - (getent_passwd['palworld'][2] | int) == palworld_dedicated_server_user_gid
+        success_msg: "Service user has the correct GID {{ palworld_dedicated_server_user_uid }}"
+        fail_msg: >-
+          Service user has the incorrect GID {{ getent_passwd['palworld'][2] }},
+          expected {{ palworld_dedicated_server_user_gid }}
+        quiet: true
+    - name: Check that data directory still exists
+      ansible.builtin.stat:
+        path: /opt/palworld/data
+      register: data_dir
+      failed_when: not (data_dir.stat.isdir | default(False))
+    - name: Check that the compose file still exists
+      ansible.builtin.stat:
+        path: /opt/palworld/docker-compose.yml
+      register: dockercompose_file
+      failed_when: not (dockercompose_file.stat.isreg | default(False))
+    - name: Check service status (if not running in Molecule using Docker)
+      when: not (palworld_dedicated_server_molecule_docker | default(False))
+      block:
+        - name: Get container info
+          community.docker.docker_container_info:
+            name: palworld-dedicated-server
+          register: result
+        - name: Check that the container does not exist
+          ansible.builtin.assert:
+            that:
+              - not result.exists
+            success_msg: Container does not exist
+            fail_msg: Container exists
+            quiet: true

@@ -90,7 +90,8 @@
       community.docker.docker_compose_v2:
         project_src: "{{ palworld_dedicated_server_install_directory }}"
         state: present  # Run 'docker compose up'.
-        pull: policy  # Follow the pull policy for each service defined in the compose file.
+        # Unless overridden by the collection, use the pull policy defined in the compose file.
+        pull: "{{ palworld_dedicated_server_temp_pull_policy | default('policy', true) }}"
         recreate: auto  # Only recreate the service when changes are detected in the compose file.
       when: not ansible_check_mode or (palworld_dedicated_server_temp_compose_file.stat.isreg | default(False))
     - name: Wait until the RCON port is open (if enabled)
