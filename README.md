@@ -11,7 +11,7 @@ This collection should make it easier to bring Palworld Dedicated Server
 under configuration management on dedicated hardware or an IaaS cloud instance,
 which is a recommended way of running Palworld as it is very resource intensive.
 
-Palworld Dedicated Server is configured to run as a Docker container on a standard machine,
+Palworld Dedicated Server is orchestrated as a Docker container on a standard machine,
 managed by Docker Compose. The Docker container used is
 [`jammsen/palworld-dedicated-server`](https://github.com/jammsen/docker-palworld-dedicated-server),
 a regularly maintained container for Palworld Dedicated Server with strong community support,
