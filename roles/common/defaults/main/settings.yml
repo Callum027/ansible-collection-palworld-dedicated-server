@@ -1,5 +1,8 @@
 ---
 
+# Password to use when logging into server administration interfaces, such as RCON. **Required.**
+# palworld_dedicated_server_admin_password: "{{ vault_palworld_dedicated_server_admin_password }}"
+
 # When setting a value here, **make sure the type of the value is correct in Ansible**,
 # as the compose file template converts the value to an environment variable definition.
 #
@@ -14,7 +17,6 @@
 # The following values are either **required** or recommended to be changed:
 #
 #   * SERVER_NAME - Name of the Palworld Dedicated Server as shown in Palworld (**required**)
-#   * ADMIN_PASSWORD - Administrator password for the server (**required**)
 #   * SERVER_PASSWORD - Set the password required to access the server, or set to a blank string to not require a password (**required**)
 #   * SERVER_DESCRIPTION - Description of the server when viewed from Palworld (recommended)
 #   * PUBLIC_IP - Public IP address of the server, as accessible from the Internet (recommended)
