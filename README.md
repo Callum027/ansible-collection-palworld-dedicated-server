@@ -1,6 +1,6 @@
 # Palworld Dedicated Server Collection for Ansible
 
-![GitHub License](https://img.shields.io/github/license/Callum027/ansible-collection-palworld-dedicated-server) ![GitHub Release](https://img.shields.io/github/v/release/Callum027/ansible-collection-palworld-dedicated-server) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Callum027/ansible-collection-palworld-dedicated-server/test.yml?label=tests)
+[![GitHub License](https://img.shields.io/github/license/Callum027/ansible-collection-palworld-dedicated-server)](https://github.com/Callum027/ansible-collection-palworld-dedicated-server/blob/main/LICENSE) [![GitHub Release](https://img.shields.io/github/v/release/Callum027/ansible-collection-palworld-dedicated-server)](https://galaxy.ansible.com/ui/repo/published/callum027/palworld_dedicated_server) [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Callum027/ansible-collection-palworld-dedicated-server/test.yml?label=tests)](https://github.com/Callum027/ansible-collection-palworld-dedicated-server/actions/workflows/test.yml)
 
 This is an Ansible collection for deploying and managing
 [Palworld Dedicated Server](https://tech.palworldgame.com/dedicated-server-guide),
@@ -16,6 +16,11 @@ managed by Docker Compose. The Docker container used is
 [`jammsen/palworld-dedicated-server`](https://github.com/jammsen/docker-palworld-dedicated-server),
 a regularly maintained container for Palworld Dedicated Server with strong community support,
 that eliminates the usual manual setup steps required for configuring Palworld.
+
+From version 1.1.0, this collection can optionally setup a
+[Prometheus exporter for Palworld Dedicated Server (designed by palworld.lol)](https://github.com/palworldlol/palworld-exporter)
+alongside your server. This enables localised metrics collection from your dedeicated server,
+which can then be turned into dashboards using [Grafana](https://grafana.com).
 
 ## Requirements
 
@@ -44,7 +49,25 @@ A number of inventory variables need to be set on the host to be able to deploy 
 
 The following inventory variables are **required** to be set on the hosts that Palworld will be installed.
 
+#### `palworld_dedicated_server_admin_password`
+
+*New in version 1.1.0.*
+
+Administrator password for the server.
+
+Used as the password when connecting to the RCON remote administration interface,
+and used internally to allow additional supporting servers to connect to the dedicated server,
+such as the Prometheus exporter.
+
+```yaml
+palworld_dedicated_server_admin_password: "{{ vault_palworld_dedicated_server_admin_password }}"  # Store the value in Ansible Vault.
+```
+
 #### `palworld_dedicated_server_settings`
+
+*Changed in version 1.1.0*: The `ADMIN_PASSWORD` field is no longer used by the collection.
+The administrator password for the dedicated server must now be set using the
+[`palworld_dedicated_server_admin_password`](#palworld_dedicated_server_admin_password) inventory variable.
 
 This variable defines the game settings for the Palworld Dedicated Server.
 These will be set as environment variables in the container.
@@ -52,7 +75,6 @@ These will be set as environment variables in the container.
 The following settings are **required** or highly recommended to be changed:
 
 * `SERVER_NAME` - Name of the Palworld Dedicated Server as shown in Palworld. **Required**.
-* `ADMIN_PASSWORD` - Administrator password for the server. **Required**.
 * `SERVER_PASSWORD` - Set the password required to access the server, or set to a blank string to not require a password. **Required**.
 * `SERVER_DESCRIPTION` - Description of the server when viewed from Palworld.
 * `PUBLIC_IP` - Public IP address of the server, as accessible from the Internet.
@@ -64,7 +86,6 @@ This is how these would be set in the Ansible inventory:
 palworld_dedicated_server_settings:
   SERVER_NAME: Palworld Dedicated Server Ansible Collection
   SERVER_DESCRIPTION: Palworld Dedicated Server automatically provisioned from an Ansible collection.
-  ADMIN_PASSWORD: "{{ vault_palworld_dedicated_server_admin_password }}"  # Store the value in Ansible Vault.
   SERVER_PASSWORD: "{{ vault_palworld_dedicated_server_server_password }}"  # Store the value in Ansible Vault.
   PUBLIC_IP: "192.0.2.1"
   COMMUNITY_SERVER: false
@@ -81,7 +102,6 @@ Take, for example, the following settings definition.
 ```yaml
 palworld_dedicated_server_settings:
   SERVER_NAME: Palworld Dedicated Server Ansible Collection  # String type
-  ADMIN_PASSWORD: "{{ vault_palworld_dedicated_server_admin_password }}"  # Should be a string type
   SERVER_PASSWORD: "{{ vault_palworld_dedicated_server_server_password }}"  # Should be a string type
   PUBLIC_IP: "192.0.2.1"  # String type
   COMMUNITY_SERVER: false  # Boolean type
@@ -93,7 +113,6 @@ These will be rendered as:
 
 ```bash
 SERVER_NAME=Palworld Dedicated Server Ansible Collection
-ADMIN_PASSWORD=...
 SERVER_PASSWORD=...
 PUBLIC_IP=192.0.2.1
 COMMUNITY_SERVER=false
@@ -117,11 +136,29 @@ The following variables are also available, with sane defaults already set. They
 * `palworld_dedicated_server_install_compose_file_owner` - Owning user of the compose file. Default is to use the value set for the install directory.
 * `palworld_dedicated_server_install_compose_file_group` - Assigned group of the compose file. Default is to use the value set for the install directory.
 * `palworld_dedicated_server_install_compose_file_mode` - Permissions for the compose file. Default is to use the value set for the install directory.
-* `palworld_dedicated_server_public_port` - The port to expose for connecting to the Palworld Dedicated Server. Default is `8211`.
+* `palworld_dedicated_server_bind_address` - The local address to bind the Palworld Dedicated Server to. Default is `0.0.0.0` (bind to all interfaces).
+    * *New in version 1.1.0.*
+* `palworld_dedicated_server_bind_port` - The port to expose for connecting to the Palworld Dedicated Server. Default is `8211`.
+    * *Changed in version 1.1.0*: Renamed from `palworld_dedicated_server_public_port`.
 * `palworld_dedicated_server_rcon_enable` - When set to `true`, enable RCON port access to the Palworld Dedicated Server. Default is `false`.
-* `palworld_dedicated_server_rcon_bind_address` - Bind address for the RCON port. Set to `0.0.0.0` to allow access from other hosts on the network. Default is `127.0.0.1`.
-* `palworld_dedicated_server_rcon_port` - RCON access port. Default is `25575`.
+* `palworld_dedicated_server_rcon_bind_address` - Bind address for the RCON server. Set to `0.0.0.0` to allow access from other hosts on the network. Default is `127.0.0.1` (bind to `localhost`).
+* `palworld_dedicated_server_rcon_bind_port` - RCON access port. Default is `25575`.
+    * *Changed in version 1.1.0*: Renamed from `palworld_dedicated_server_rcon_port`.
 * `palworld_dedicated_server_rcon_wait_timeout` - Timeout for waiting for the RCON port to come online after the container starts, in seconds. This may need to be increased if the host's Internet connection is slow (as on the first run, the container takes a while to download Palworld after it starts). Default is `600`.
+* `palworld_dedicated_server_exporter_enable` - When set to `true`, orchestrate and start the Prometheus exporter for Palworld Dedicated Server. Default is `false`.
+    * *New in version 1.1.0.*
+* `palworld_dedicated_server_exporter_image_uri` - The URI for the image to install. Default is [`bostrt/palworld-exporter`](https://hub.docker.com/r/bostrt/palworld-exporter). **As this collection is designed around this image, this should not be changed.**
+    * *New in version 1.1.0.*
+* `palworld_dedicated_server_exporter_image_tag` - The image tag to install. Default is `latest`.
+    * *New in version 1.1.0.*
+* `palworld_dedicated_server_exporter_image_pull_policy` - The image pull policy to set for the Prometheus exporter. Default is to use the value of `palworld_dedicated_server_image_pull_policy`.
+    * *New in version 1.1.0.*
+* `palworld_dedicated_server_exporter_bind_address` - Bind address for the Prometheus exporter. You may want to override this to ensure it is only available on specific interfaces. Default is `0.0.0.0` (bind to all interfaces).
+    * *New in version 1.1.0.*
+* `palworld_dedicated_server_exporter_bind_port` - Prometheus exporter access port. Default is `9877`.
+    * *New in version 1.1.0.*
+* `palworld_dedicated_server_exporter_wait_timeout` - Timeout for waiting for the Prometheus exporter port to come online after the container starts, in seconds. Default is `300`.
+    * *New in version 1.1.0.*
 
 ## Playbooks
 
