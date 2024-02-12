@@ -1,0 +1,14 @@
+---
+
+palworld_dedicated_server_exporter_enable: false
+
+palworld_dedicated_server_exporter_image_uri: bostrt/palworld-exporter
+palworld_dedicated_server_exporter_image_tag: latest
+palworld_dedicated_server_exporter_image_pull_policy: "{{ palworld_dedicated_server_image_pull_policy }}"
+
+palworld_dedicated_server_exporter_container_name: null
+
+palworld_dedicated_server_exporter_bind_address: "0.0.0.0"
+palworld_dedicated_server_exporter_bind_port: 9877
+
+palworld_dedicated_server_exporter_wait_timeout: 300

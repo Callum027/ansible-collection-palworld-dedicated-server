@@ -55,6 +55,11 @@
       when: not ansible_check_mode or (palworld_dedicated_server_temp_compose_file.stat.isreg | default(False))
     - name: Wait until the RCON port is open (if enabled)
       ansible.builtin.wait_for:
-        port: "{{ palworld_dedicated_server_rcon_port }}"
+        port: "{{ palworld_dedicated_server_rcon_bind_port }}"
         timeout: "{{ palworld_dedicated_server_rcon_wait_timeout }}"
       when: palworld_dedicated_server_rcon_enable
+    - name: Wait until the Prometheus exporter port is open (if enabled)
+      ansible.builtin.wait_for:
+        port: "{{ palworld_dedicated_server_exporter_bind_port }}"
+        timeout: "{{ palworld_dedicated_server_exporter_wait_timeout }}"
+      when: palworld_dedicated_server_exporter_enable

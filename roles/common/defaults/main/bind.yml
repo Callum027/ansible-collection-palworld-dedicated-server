@@ -1,0 +1,4 @@
+---
+
+palworld_dedicated_server_bind_address: "0.0.0.0"
+palworld_dedicated_server_bind_port: 8211

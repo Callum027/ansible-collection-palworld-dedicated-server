@@ -31,10 +31,10 @@ provisioner:
         palworld_dedicated_server_container_name: palworld-dedicated-server
     host_vars:
       localhost:
+        palworld_dedicated_server_admin_password: "123456"
         palworld_dedicated_server_settings:
           SERVER_NAME: Palworld Dedicated Server Molecule Test
           SERVER_DESCRIPTION: Molecule test for Palworld Dedicated Server
-          ADMIN_PASSWORD: "123456"
           SERVER_PASSWORD: "123456"
           COMMUNITY_SERVER: false
 
