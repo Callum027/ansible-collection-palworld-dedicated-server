@@ -19,9 +19,21 @@ jobs:
       - name: Run pre-commit hooks
         uses: pre-commit/action@v3.0.1
 
-  molecule:
+  ansible-galaxy:
     runs-on: ubuntu-22.04
     needs: pre-commit
+    steps:
+      - name: Checkout release
+        uses: actions/checkout@v4
+      - name: Test Ansible Galaxy collection build
+        uses: artis3n/ansible_galaxy_collection@v2
+        with:
+          api_key: ${{ secrets.ANSIBLE_GALAXY_API_KEY }}
+          publish: false
+
+  molecule:
+    runs-on: ubuntu-22.04
+    needs: ansible-galaxy
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
