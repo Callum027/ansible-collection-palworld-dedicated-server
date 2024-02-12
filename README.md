@@ -17,7 +17,7 @@ managed by Docker Compose. The Docker container used is
 a regularly maintained container for Palworld Dedicated Server with strong community support,
 that eliminates the usual manual setup steps required for configuring Palworld.
 
-From version 1.1.0, this collection can optionally setup a
+From version 2.0.0, this collection can optionally setup a
 [Prometheus exporter for Palworld Dedicated Server (designed by palworld.lol)](https://github.com/palworldlol/palworld-exporter)
 alongside your server. This enables localised metrics collection from your dedeicated server,
 which can then be turned into dashboards using [Grafana](https://grafana.com).
@@ -51,7 +51,7 @@ The following inventory variables are **required** to be set on the hosts that P
 
 #### `palworld_dedicated_server_admin_password`
 
-*New in version 1.1.0.*
+*New in version 2.0.0.*
 
 Administrator password for the server.
 
@@ -65,7 +65,7 @@ palworld_dedicated_server_admin_password: "{{ vault_palworld_dedicated_server_ad
 
 #### `palworld_dedicated_server_settings`
 
-*Changed in version 1.1.0*: The `ADMIN_PASSWORD` field is no longer used by the collection.
+*Changed in version 2.0.0*: The `ADMIN_PASSWORD` field is no longer used by the collection.
 The administrator password for the dedicated server must now be set using the
 [`palworld_dedicated_server_admin_password`](#palworld_dedicated_server_admin_password) inventory variable.
 
@@ -137,28 +137,28 @@ The following variables are also available, with sane defaults already set. They
 * `palworld_dedicated_server_install_compose_file_group` - Assigned group of the compose file. Default is to use the value set for the install directory.
 * `palworld_dedicated_server_install_compose_file_mode` - Permissions for the compose file. Default is to use the value set for the install directory.
 * `palworld_dedicated_server_bind_address` - The local address to bind the Palworld Dedicated Server to. Default is `0.0.0.0` (bind to all interfaces).
-    * *New in version 1.1.0.*
+    * *New in version 2.0.0.*
 * `palworld_dedicated_server_bind_port` - The port to expose for connecting to the Palworld Dedicated Server. Default is `8211`.
-    * *Changed in version 1.1.0*: Renamed from `palworld_dedicated_server_public_port`.
+    * *Changed in version 2.0.0*: Renamed from `palworld_dedicated_server_public_port`.
 * `palworld_dedicated_server_rcon_enable` - When set to `true`, enable RCON port access to the Palworld Dedicated Server. Default is `false`.
 * `palworld_dedicated_server_rcon_bind_address` - Bind address for the RCON server. Set to `0.0.0.0` to allow access from other hosts on the network. Default is `127.0.0.1` (bind to `localhost`).
 * `palworld_dedicated_server_rcon_bind_port` - RCON access port. Default is `25575`.
-    * *Changed in version 1.1.0*: Renamed from `palworld_dedicated_server_rcon_port`.
+    * *Changed in version 2.0.0*: Renamed from `palworld_dedicated_server_rcon_port`.
 * `palworld_dedicated_server_rcon_wait_timeout` - Timeout for waiting for the RCON port to come online after the container starts, in seconds. This may need to be increased if the host's Internet connection is slow (as on the first run, the container takes a while to download Palworld after it starts). Default is `600`.
 * `palworld_dedicated_server_exporter_enable` - When set to `true`, orchestrate and start the Prometheus exporter for Palworld Dedicated Server. Default is `false`.
-    * *New in version 1.1.0.*
+    * *New in version 2.0.0.*
 * `palworld_dedicated_server_exporter_image_uri` - The URI for the image to install. Default is [`bostrt/palworld-exporter`](https://hub.docker.com/r/bostrt/palworld-exporter). **As this collection is designed around this image, this should not be changed.**
-    * *New in version 1.1.0.*
+    * *New in version 2.0.0.*
 * `palworld_dedicated_server_exporter_image_tag` - The image tag to install. Default is `latest`.
-    * *New in version 1.1.0.*
+    * *New in version 2.0.0.*
 * `palworld_dedicated_server_exporter_image_pull_policy` - The image pull policy to set for the Prometheus exporter. Default is to use the value of `palworld_dedicated_server_image_pull_policy`.
-    * *New in version 1.1.0.*
+    * *New in version 2.0.0.*
 * `palworld_dedicated_server_exporter_bind_address` - Bind address for the Prometheus exporter. You may want to override this to ensure it is only available on specific interfaces. Default is `0.0.0.0` (bind to all interfaces).
-    * *New in version 1.1.0.*
+    * *New in version 2.0.0.*
 * `palworld_dedicated_server_exporter_bind_port` - Prometheus exporter access port. Default is `9877`.
-    * *New in version 1.1.0.*
+    * *New in version 2.0.0.*
 * `palworld_dedicated_server_exporter_wait_timeout` - Timeout for waiting for the Prometheus exporter port to come online after the container starts, in seconds. Default is `300`.
-    * *New in version 1.1.0.*
+    * *New in version 2.0.0.*
 
 ## Playbooks
 
