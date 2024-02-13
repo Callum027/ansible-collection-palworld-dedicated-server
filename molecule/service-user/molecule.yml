@@ -27,8 +27,6 @@ provisioner:
   inventory:
     group_vars:
       palworld:
-        palworld_dedicated_server_molecule_testing: true
-        palworld_dedicated_server_molecule_localhost: true
         palworld_dedicated_server_container_name: palworld-dedicated-server
         palworld_dedicated_server_exporter_container_name: palworld-exporter
         palworld_dedicated_server_service_user_enable: true

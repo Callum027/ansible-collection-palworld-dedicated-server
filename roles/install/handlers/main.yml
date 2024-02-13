@@ -1,0 +1,6 @@
+---
+
+- name: Disable services
+  ansible.builtin.include_role:
+    name: disable
+  listen: disable services

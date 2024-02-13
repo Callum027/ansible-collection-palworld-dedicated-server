@@ -60,32 +60,37 @@
     group: "{{ palworld_dedicated_server_install_directory_group }}"
     mode: "{{ palworld_dedicated_server_install_directory_mode }}"
 
-- name: Check if the data directory would be modified
-  ansible.builtin.file:
+- name: Check if the data directory exists
+  ansible.builtin.stat:
     path: "{{ palworld_dedicated_server_install_directory }}/data"
-    state: directory
-    owner: "{{ palworld_dedicated_server_temp_user_uid }}"
-    group: "{{ palworld_dedicated_server_temp_user_gid }}"
-    mode: "750"
-  check_mode: true
-  register: palworld_dedicated_server_temp_data_dir
+  register: palworld_dedicated_server_temp_data_dir_stat
 
-- name: Check if files within the data directory would have their owner/group changed
-  ansible.builtin.file:
-    path: "{{ palworld_dedicated_server_install_directory }}/data"
-    owner: "{{ palworld_dedicated_server_temp_user_uid }}"
-    group: "{{ palworld_dedicated_server_temp_user_gid }}"
-    recurse: true
-  check_mode: true
-  register: palworld_dedicated_server_temp_data_files
-
-- name: Create compose file
-  ansible.builtin.template:
-    src: docker-compose.yml.j2
-    dest: "{{ palworld_dedicated_server_install_directory }}/docker-compose.yml"
-    owner: "{{ palworld_dedicated_server_install_compose_file_owner }}"
-    group: "{{ palworld_dedicated_server_install_compose_file_group }}"
-    mode: "{{ palworld_dedicated_server_install_compose_file_mode }}"
+- name: Update files and directories that require a service restart
+  notify: disable services
+  block:
+    - name: Check if the data directory would be modified
+      ansible.builtin.file:
+        path: "{{ palworld_dedicated_server_install_directory }}/data"
+        state: directory
+        owner: "{{ palworld_dedicated_server_temp_user_uid }}"
+        group: "{{ palworld_dedicated_server_temp_user_gid }}"
+        mode: "750"
+      check_mode: true
+    - name: Check if files within the data directory would have their owner/group changed
+      ansible.builtin.file:
+        path: "{{ palworld_dedicated_server_install_directory }}/data"
+        owner: "{{ palworld_dedicated_server_temp_user_uid }}"
+        group: "{{ palworld_dedicated_server_temp_user_gid }}"
+        recurse: true
+      check_mode: true
+      when: palworld_dedicated_server_temp_data_dir_stat.stat.isdir | default(False)
+    - name: Create compose file
+      ansible.builtin.template:
+        src: docker-compose.yml.j2
+        dest: "{{ palworld_dedicated_server_install_directory }}/docker-compose.yml"
+        owner: "{{ palworld_dedicated_server_install_compose_file_owner }}"
+        group: "{{ palworld_dedicated_server_install_compose_file_group }}"
+        mode: "{{ palworld_dedicated_server_install_compose_file_mode }}"
 
 - name: Validate compose file
   ansible.builtin.command:
@@ -94,14 +99,8 @@
   changed_when: false
   when: not ansible_check_mode
 
-- name: Destroy services (if data directory or files need to be modified)
-  community.docker.docker_compose_v2:
-    project_src: "{{ palworld_dedicated_server_install_directory }}"
-    state: absent  # Run 'docker compose down'.
-    remove_orphans: true  # Remove orphan services (not defined in the compose file).
-  when: >-
-    palworld_dedicated_server_temp_data_dir.changed
-    or palworld_dedicated_server_temp_data_files.changed
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
 
 - name: Create data directory
   ansible.builtin.file:
@@ -118,31 +117,30 @@
     group: "{{ palworld_dedicated_server_temp_user_gid }}"
     recurse: true
 
+- name: Check that the compose file exists
+  ansible.builtin.stat:
+    path: "{{ palworld_dedicated_server_install_directory }}/docker-compose.yml"
+  register: palworld_dedicated_server_temp_compose_file
+  failed_when:
+    - not ansible_check_mode
+    - not (palworld_dedicated_server_temp_compose_file.stat.isreg | default(False))
+
 - name: Start services
-  when: not palworld_dedicated_server_molecule_docker
-  block:
-    - name: Check that the compose file exists
-      ansible.builtin.stat:
-        path: "{{ palworld_dedicated_server_install_directory }}/docker-compose.yml"
-      register: palworld_dedicated_server_temp_compose_file
-      failed_when:
-        - not ansible_check_mode
-        - not (palworld_dedicated_server_temp_compose_file.stat.isreg | default(False))
-    - name: Start services
-      community.docker.docker_compose_v2:
-        project_src: "{{ palworld_dedicated_server_install_directory }}"
-        state: present  # Run 'docker compose up'.
-        # Unless overridden by the collection, use the pull policy defined in the compose file.
-        pull: "{{ palworld_dedicated_server_temp_pull_policy | default('policy', true) }}"
-        recreate: auto  # Only recreate the service when changes are detected in the compose file.
-      when: not ansible_check_mode or (palworld_dedicated_server_temp_compose_file.stat.isreg | default(False))
-    - name: Wait until the RCON port is open (if enabled)
-      ansible.builtin.wait_for:
-        port: "{{ palworld_dedicated_server_rcon_bind_port }}"
-        timeout: "{{ palworld_dedicated_server_rcon_wait_timeout }}"
-      when: palworld_dedicated_server_rcon_enable
-    - name: Wait until the Prometheus exporter port is open (if enabled)
-      ansible.builtin.wait_for:
-        port: "{{ palworld_dedicated_server_exporter_bind_port }}"
-        timeout: "{{ palworld_dedicated_server_exporter_wait_timeout }}"
-      when: palworld_dedicated_server_exporter_enable
+  community.docker.docker_compose_v2:
+    project_src: "{{ palworld_dedicated_server_install_directory }}"
+    state: present  # Run 'docker compose up'.
+    # Unless overridden by the collection, use the pull policy defined in the compose file.
+    pull: "{{ palworld_dedicated_server_temp_pull_policy | default('policy', true) }}"
+    recreate: auto  # Only recreate the service when changes are detected in the compose file.
+  when: not ansible_check_mode or (palworld_dedicated_server_temp_compose_file.stat.isreg | default(False))
+
+- name: Wait until the RCON port is open (if enabled)
+  ansible.builtin.wait_for:
+    port: "{{ palworld_dedicated_server_rcon_bind_port }}"
+    timeout: "{{ palworld_dedicated_server_rcon_wait_timeout }}"
+  when: palworld_dedicated_server_rcon_enable
+- name: Wait until the Prometheus exporter port is open (if enabled)
+  ansible.builtin.wait_for:
+    port: "{{ palworld_dedicated_server_exporter_bind_port }}"
+    timeout: "{{ palworld_dedicated_server_exporter_wait_timeout }}"
+  when: palworld_dedicated_server_exporter_enable
