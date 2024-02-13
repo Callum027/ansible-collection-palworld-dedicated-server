@@ -1,6 +1,0 @@
----
-
-- name: Disable services
-  ansible.builtin.include_tasks:
-    file: roles/disable/main.yml
-  listen: disable services

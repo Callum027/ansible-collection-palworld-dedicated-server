@@ -65,32 +65,32 @@
     path: "{{ palworld_dedicated_server_install_directory }}/data"
   register: palworld_dedicated_server_temp_data_dir_stat
 
-- name: Update files and directories that require a service restart
-  notify: disable services
-  block:
-    - name: Check if the data directory would be modified
-      ansible.builtin.file:
-        path: "{{ palworld_dedicated_server_install_directory }}/data"
-        state: directory
-        owner: "{{ palworld_dedicated_server_temp_user_uid }}"
-        group: "{{ palworld_dedicated_server_temp_user_gid }}"
-        mode: "750"
-      check_mode: true
-    - name: Check if files within the data directory would have their owner/group changed
-      ansible.builtin.file:
-        path: "{{ palworld_dedicated_server_install_directory }}/data"
-        owner: "{{ palworld_dedicated_server_temp_user_uid }}"
-        group: "{{ palworld_dedicated_server_temp_user_gid }}"
-        recurse: true
-      check_mode: true
-      when: palworld_dedicated_server_temp_data_dir_stat.stat.isdir | default(False)
-    - name: Create compose file
-      ansible.builtin.template:
-        src: docker-compose.yml.j2
-        dest: "{{ palworld_dedicated_server_install_directory }}/docker-compose.yml"
-        owner: "{{ palworld_dedicated_server_install_compose_file_owner }}"
-        group: "{{ palworld_dedicated_server_install_compose_file_group }}"
-        mode: "{{ palworld_dedicated_server_install_compose_file_mode }}"
+- name: Check if the data directory will be modified
+  ansible.builtin.file:
+    path: "{{ palworld_dedicated_server_install_directory }}/data"
+    state: directory
+    owner: "{{ palworld_dedicated_server_temp_user_uid }}"
+    group: "{{ palworld_dedicated_server_temp_user_gid }}"
+    mode: "750"
+  register: palworld_dedicated_server_temp_data_dir
+
+- name: Check if files within the data directory will have their owner/group changed
+  ansible.builtin.file:
+    path: "{{ palworld_dedicated_server_install_directory }}/data"
+    owner: "{{ palworld_dedicated_server_temp_user_uid }}"
+    group: "{{ palworld_dedicated_server_temp_user_gid }}"
+    recurse: true
+  register: palworld_dedicated_server_temp_data_files
+  when: palworld_dedicated_server_temp_data_dir_stat.stat.isdir | default(False)
+
+- name: Create compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ palworld_dedicated_server_install_directory }}/docker-compose.yml"
+    owner: "{{ palworld_dedicated_server_install_compose_file_owner }}"
+    group: "{{ palworld_dedicated_server_install_compose_file_group }}"
+    mode: "{{ palworld_dedicated_server_install_compose_file_mode }}"
+  register: palworld_dedicated_server_temp_compose_file
 
 - name: Validate compose file
   ansible.builtin.command:
@@ -99,8 +99,13 @@
   changed_when: false
   when: not ansible_check_mode
 
-- name: Flush handlers
-  ansible.builtin.meta: flush_handlers
+- name: Disable services (if any services files or directories will be, or have been modified)  # noqa: no-handler
+  ansible.builtin.include_role:
+    name: disable
+  when: >-
+    palworld_dedicated_server_temp_data_dir.changed
+    or palworld_dedicated_server_temp_data_files.changed
+    or palworld_dedicated_server_temp_compose_file.changed
 
 - name: Create data directory
   ansible.builtin.file:
