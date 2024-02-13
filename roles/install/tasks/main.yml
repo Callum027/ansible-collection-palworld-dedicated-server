@@ -4,6 +4,54 @@
   ansible.builtin.import_role:
     name: common
 
+- name: Create service user (if enabled)
+  when: palworld_dedicated_server_service_user_enable
+  block:
+    - name: Create service group
+      ansible.builtin.group:
+        name: "{{ palworld_dedicated_server_user_group }}"
+        gid: "{{ palworld_dedicated_server_user_gid | default(omit, true) }}"
+    - name: Create service user
+      ansible.builtin.user:
+        name: "{{ palworld_dedicated_server_user_name }}"
+        uid: "{{ palworld_dedicated_server_user_uid | default(omit, true) }}"
+        group: "{{ palworld_dedicated_server_user_group }}"
+        groups: "{{ palworld_dedicated_server_user_additional_groups }}"
+        home: "{{ palworld_dedicated_server_install_directory }}"
+        create_home: false
+        shell: /usr/sbin/nologin
+    - name: Get service user metadata
+      block:
+        - name: Get service user metadata
+          ansible.builtin.getent:
+            database: passwd
+            key: "{{ palworld_dedicated_server_user_name }}"
+          register: palworld_dedicated_server_temp_user_metadata
+        - name: Set container user UID and GID to the service user
+          ansible.builtin.set_fact:
+            palworld_dedicated_server_temp_user_uid: "{{ getent_passwd['palworld'][1] | int }}"
+            palworld_dedicated_server_temp_user_gid: "{{ getent_passwd['palworld'][2] | int }}"
+      rescue:
+        - name: Fail if getting service user metadata failed, and not running in check mode
+          ansible.builtin.assert:
+            that:
+              - ansible_check_mode
+            success_msg: Service user does not exist, setting placeholder UID and GID for check mode
+            fail_msg: >-
+              Getting metadata for service user '{{ palworld_dedicated_server_user_name }}' failed,
+              check that the service user was created properly
+            quiet: true
+        - name: Set container user UID and GID to placeholders (if in check mode, and service user does not exist)
+          ansible.builtin.set_fact:
+            palworld_dedicated_server_temp_user_uid: "{{ palworld_dedicated_server_user_uid | default(1234, true) }}"
+            palworld_dedicated_server_temp_user_gid: "{{ palworld_dedicated_server_user_gid | default(1234, true) }}"
+
+- name: Set container user UID and GID to defaults (if service user is disabled)
+  ansible.builtin.set_fact:
+    palworld_dedicated_server_temp_user_uid: "{{ palworld_dedicated_container_default_uid }}"
+    palworld_dedicated_server_temp_user_gid: "{{ palworld_dedicated_container_default_gid }}"
+  when: not palworld_dedicated_server_service_user_enable
+
 - name: Create install directory
   ansible.builtin.file:
     path: "{{ palworld_dedicated_server_install_directory }}"
@@ -12,13 +60,24 @@
     group: "{{ palworld_dedicated_server_install_directory_group }}"
     mode: "{{ palworld_dedicated_server_install_directory_mode }}"
 
-- name: Create data directory
+- name: Check if the data directory would be modified
   ansible.builtin.file:
     path: "{{ palworld_dedicated_server_install_directory }}/data"
     state: directory
-    owner: 1000
-    group: 1000
+    owner: "{{ palworld_dedicated_server_temp_user_uid }}"
+    group: "{{ palworld_dedicated_server_temp_user_gid }}"
     mode: "750"
+  check_mode: true
+  register: palworld_dedicated_server_temp_data_dir
+
+- name: Check if files within the data directory would have their owner/group changed
+  ansible.builtin.file:
+    path: "{{ palworld_dedicated_server_install_directory }}/data"
+    owner: "{{ palworld_dedicated_server_temp_user_uid }}"
+    group: "{{ palworld_dedicated_server_temp_user_gid }}"
+    recurse: true
+  check_mode: true
+  register: palworld_dedicated_server_temp_data_files
 
 - name: Create compose file
   ansible.builtin.template:
@@ -35,17 +94,41 @@
   changed_when: false
   when: not ansible_check_mode
 
-- name: Start services (When not running in Molecule using Docker)
+- name: Destroy services (if data directory or files need to be modified)
+  community.docker.docker_compose_v2:
+    project_src: "{{ palworld_dedicated_server_install_directory }}"
+    state: absent  # Run 'docker compose down'.
+    remove_orphans: true  # Remove orphan services (not defined in the compose file).
+  when: >-
+    palworld_dedicated_server_temp_data_dir.changed
+    or palworld_dedicated_server_temp_data_files.changed
+
+- name: Create data directory
+  ansible.builtin.file:
+    path: "{{ palworld_dedicated_server_install_directory }}/data"
+    state: directory
+    owner: "{{ palworld_dedicated_server_temp_user_uid }}"
+    group: "{{ palworld_dedicated_server_temp_user_gid }}"
+    mode: "750"
+
+- name: Recursively set owner/group on all data directory files
+  ansible.builtin.file:
+    path: "{{ palworld_dedicated_server_install_directory }}/data"
+    owner: "{{ palworld_dedicated_server_temp_user_uid }}"
+    group: "{{ palworld_dedicated_server_temp_user_gid }}"
+    recurse: true
+
+- name: Start services
   when: not palworld_dedicated_server_molecule_docker
   block:
-    - name: Check that the compose file exists (for check mode)
+    - name: Check that the compose file exists
       ansible.builtin.stat:
         path: "{{ palworld_dedicated_server_install_directory }}/docker-compose.yml"
       register: palworld_dedicated_server_temp_compose_file
       failed_when:
         - not ansible_check_mode
         - not (palworld_dedicated_server_temp_compose_file.stat.isreg | default(False))
-    - name: Start services (skipped if in check mode and the compose file does not exist)
+    - name: Start services
       community.docker.docker_compose_v2:
         project_src: "{{ palworld_dedicated_server_install_directory }}"
         state: present  # Run 'docker compose up'.

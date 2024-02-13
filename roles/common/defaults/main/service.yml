@@ -1,0 +1,8 @@
+---
+
+# TODO: Set to `true` by default in version 3.0.0.
+palworld_dedicated_server_service_user_enable: false
+
+# When set to null: Allow the OS to auto-allocate the UID/GID.
+palworld_dedicated_server_service_user_uid: null
+palworld_dedicated_server_service_user_gid: null

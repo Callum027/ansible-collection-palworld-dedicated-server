@@ -3,3 +3,7 @@
 palworld_dedicated_server_container_name: null
 
 palworld_dedicated_server_container_timezone: Etc/UTC
+
+# Only used when service users are disabled.
+palworld_dedicated_server_container_default_uid: 1000
+palworld_dedicated_server_container_default_gid: 1000

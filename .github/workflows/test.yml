@@ -34,6 +34,12 @@ jobs:
   molecule:
     runs-on: ubuntu-22.04
     needs: ansible-galaxy
+    strategy:
+      matrix:
+        scenario:
+          - default
+          - prometheus-exporter
+          - service-user
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
@@ -51,6 +57,6 @@ jobs:
         env:
           FORCE_COLOR: "1"
       - name: Run Molecule tests
-        run: molecule test --scenario-name localhost
+        run: molecule test --scenario-name ${{ matrix.scenario }}
         env:
           ANSIBLE_FORCE_COLOR: "True"
