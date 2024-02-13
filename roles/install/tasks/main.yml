@@ -26,7 +26,6 @@
           ansible.builtin.getent:
             database: passwd
             key: "{{ palworld_dedicated_server_user_name }}"
-          register: palworld_dedicated_server_temp_user_metadata
         - name: Set container user UID and GID to the service user
           ansible.builtin.set_fact:
             palworld_dedicated_server_temp_uid: "{{ getent_passwd['palworld'][1] | int }}"
@@ -69,16 +68,16 @@
   ansible.builtin.file:
     path: "{{ palworld_dedicated_server_install_directory }}/data"
     state: directory
-    owner: "{{ palworld_dedicated_server_temp_user_uid }}"
-    group: "{{ palworld_dedicated_server_temp_user_gid }}"
+    owner: "{{ palworld_dedicated_server_temp_uid }}"
+    group: "{{ palworld_dedicated_server_temp_gid }}"
     mode: "750"
   register: palworld_dedicated_server_temp_data_dir
 
 - name: Check if files within the data directory will have their owner/group changed
   ansible.builtin.file:
     path: "{{ palworld_dedicated_server_install_directory }}/data"
-    owner: "{{ palworld_dedicated_server_temp_user_uid }}"
-    group: "{{ palworld_dedicated_server_temp_user_gid }}"
+    owner: "{{ palworld_dedicated_server_temp_uid }}"
+    group: "{{ palworld_dedicated_server_temp_gid }}"
     recurse: true
   register: palworld_dedicated_server_temp_data_files
   when: palworld_dedicated_server_temp_data_dir_stat.stat.isdir | default(False)
@@ -111,15 +110,15 @@
   ansible.builtin.file:
     path: "{{ palworld_dedicated_server_install_directory }}/data"
     state: directory
-    owner: "{{ palworld_dedicated_server_temp_user_uid }}"
-    group: "{{ palworld_dedicated_server_temp_user_gid }}"
+    owner: "{{ palworld_dedicated_server_temp_uid }}"
+    group: "{{ palworld_dedicated_server_temp_gid }}"
     mode: "750"
 
 - name: Recursively set owner/group on all data directory files
   ansible.builtin.file:
     path: "{{ palworld_dedicated_server_install_directory }}/data"
-    owner: "{{ palworld_dedicated_server_temp_user_uid }}"
-    group: "{{ palworld_dedicated_server_temp_user_gid }}"
+    owner: "{{ palworld_dedicated_server_temp_uid }}"
+    group: "{{ palworld_dedicated_server_temp_gid }}"
     recurse: true
 
 - name: Check that the compose file exists
