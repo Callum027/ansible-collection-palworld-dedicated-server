@@ -48,8 +48,8 @@
 
 - name: Set container user UID and GID to defaults (if service user is disabled)
   ansible.builtin.set_fact:
-    palworld_dedicated_server_temp_user_uid: "{{ palworld_dedicated_container_default_uid }}"
-    palworld_dedicated_server_temp_user_gid: "{{ palworld_dedicated_container_default_gid }}"
+    palworld_dedicated_server_temp_user_uid: "{{ palworld_dedicated_server_container_default_uid }}"
+    palworld_dedicated_server_temp_user_gid: "{{ palworld_dedicated_server_container_default_gid }}"
   when: not palworld_dedicated_server_service_user_enable
 
 - name: Create install directory
