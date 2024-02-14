@@ -14,7 +14,7 @@
     - name: Create service user
       ansible.builtin.user:
         name: "{{ palworld_dedicated_server_service_user_name }}"
-        uid: "{{ palworld_dedicated_server_user_uid | default(omit, true) }}"
+        uid: "{{ palworld_dedicated_server_service_user_uid | default(omit, true) }}"
         group: "{{ palworld_dedicated_server_service_group_name }}"
         groups: "{{ palworld_dedicated_server_service_user_additional_groups }}"
         home: "{{ palworld_dedicated_server_install_directory }}"
@@ -42,8 +42,8 @@
             quiet: true
         - name: Set container user UID and GID to placeholders (if in check mode, and service user does not exist)
           ansible.builtin.set_fact:
-            palworld_dedicated_server_temp_uid: "{{ palworld_dedicated_server_user_uid | default(1234, true) }}"
-            palworld_dedicated_server_temp_gid: "{{ palworld_dedicated_server_group_gid | default(1234, true) }}"
+            palworld_dedicated_server_temp_uid: "{{ palworld_dedicated_server_service_user_uid | default(1234, true) }}"
+            palworld_dedicated_server_temp_gid: "{{ palworld_dedicated_server_service_group_gid | default(1234, true) }}"
 
 - name: Set container user UID and GID to defaults (if service user is disabled)
   ansible.builtin.set_fact:
