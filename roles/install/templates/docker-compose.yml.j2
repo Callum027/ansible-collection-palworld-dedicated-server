@@ -23,8 +23,8 @@ services:
 {% endif %}
     environment:
       - TZ={{ palworld_dedicated_server_container_timezone }}
-      - PUID=1000
-      - PGID=1000
+      - PUID={{ palworld_dedicated_server_temp_uid }}
+      - PGID={{ palworld_dedicated_server_temp_gid }}
       - SERVER_SETTINGS_MODE=auto
       # Always enabled, to allow access using the local CLI command, and Palworld Exporter.
       # External access is controlled through publishing the port.
@@ -51,6 +51,7 @@ services:
 {% if palworld_dedicated_server_exporter_container_name %}
     container_name: '{{ palworld_dedicated_server_exporter_container_name }}'
 {% endif %}
+    user: {{ palworld_dedicated_server_temp_uid }}:{{ palworld_dedicated_server_temp_gid }}
     depends_on:
       - palworld-dedicated-server
     ports:

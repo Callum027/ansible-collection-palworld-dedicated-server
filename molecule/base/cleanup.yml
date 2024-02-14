@@ -4,9 +4,12 @@
   hosts: palworld
   become: true
   tasks:
-    - name: Destroy the Palworld Dedicated Server container
+    - name: Destroy all containers
       community.docker.docker_container:
-        name: palworld-dedicated-server
+        name: "{{ item }}"
         state: absent
         force_kill: true
         keep_volumes: false
+      loop:
+        - palworld-dedicated-server
+        - palworld-exporter

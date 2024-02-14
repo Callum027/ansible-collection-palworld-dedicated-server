@@ -5,27 +5,33 @@ dependency:
   options:
     requirements-file: requirements.yml
 
+driver:
+  name: default
+  options:
+    managed: false
+    ansible_connection_options:
+      ansible_connection: local
+
 platforms:
-  - name: ${CI_PREFIX:-molecule-callum027-palworld_dedicated_server}-palworld1
-    image: ubuntu-22.04-x86_64
+  - name: localhost
     groups:
       - palworld
 
 provisioner:
   name: ansible
   playbooks:
-    prepare: ../base/prepare.yml
     converge: ../base/converge.yml
     verify: ../base/update.yml
     side_effect: ../base/restart.yml
+    cleanup: ../base/cleanup.yml
   inventory:
     group_vars:
       palworld:
-        palworld_dedicated_server_molecule_testing: true
-        palworld_dedicated_server_molecule_openstack: true
         palworld_dedicated_server_container_name: palworld-dedicated-server
+        palworld_dedicated_server_exporter_enable: true
+        palworld_dedicated_server_exporter_container_name: palworld-exporter
     host_vars:
-      ${CI_PREFIX:-molecule-callum027-palworld_dedicated_server}-palworld1:
+      localhost:
         palworld_dedicated_server_admin_password: "123456"
         palworld_dedicated_server_settings:
           SERVER_NAME: Palworld Dedicated Server Molecule Test
@@ -40,10 +46,7 @@ scenario:
   test_sequence:
     - dependency
     - cleanup
-    - destroy
     - syntax
-    - create
-    - prepare
     - check
     - converge
     - idempotence
@@ -65,4 +68,3 @@ scenario:
     # Run uninstall again to ensure it works even if already uninstalled.
     - side_effect ../base/uninstall.yml
     - cleanup
-    - destroy
