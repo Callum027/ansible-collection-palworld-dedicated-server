@@ -39,7 +39,8 @@ jobs:
         scenario:
           - default
           - prometheus-exporter
-          - service-user
+          - service-user-autogen-uid-gid
+          - service-user-explicit-uid-gid
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
