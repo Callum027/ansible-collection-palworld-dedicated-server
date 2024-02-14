@@ -181,6 +181,10 @@ Here is the full list of available inventory variables. They all have sane defau
 * `palworld_dedicated_server_exporter_image_pull_policy` - The image pull policy to set for the Prometheus exporter.
     * *New in version 2.0.0.*
     * Default is to use the value of `palworld_dedicated_server_image_pull_policy`.
+* `palworld_dedicated_server_exporter_container_name` - The name of the Palworld Prometheus exporter container on the system.
+    * *New in version 2.0.0.*
+    * When set to `null`, Docker Compose will automatically generate the container name.
+    * Default is `null`.
 * `palworld_dedicated_server_exporter_bind_address` - Bind address for the Prometheus exporter.
     * *New in version 2.0.0.*
     * You may want to override this to ensure it is only available on specific interfaces.
@@ -202,7 +206,7 @@ Here is the full list of available inventory variables. They all have sane defau
 * `palworld_dedicated_server_service_user_uid` - The unique UID to assign to the service user.
     * *New in version 2.1.0.*
     * No existing user on the system must be using the UID set in this value.
-    * When set to `null`, let the system auto-generate a unique UID for the service user.
+    * When set to `null`, the system will automatically assign a unique UID for the service user.
     * Default is `null`.
 * `palworld_dedicated_server_service_user_additional_groups` - A list of additional group names or GIDs to assign to the service user.
     * *New in version 2.1.0.*
@@ -214,12 +218,12 @@ Here is the full list of available inventory variables. They all have sane defau
 * `palworld_dedicated_server_service_group_gid` - The unique GID to assign to the service group.
     * *New in version 2.1.0.*
     * No existing group on the system must be using the GID set in this value.
-    * When set to `null`, let the system auto-generate a unique GID for the service group.
+    * When set to `null`, the system will automatically assign a unique GID for the service group.
     * Default is `null`.
 
 ### How-tos
 
-Here are a few short guides for how to configure the collection for some commonly useds setups.
+Here are a few short guides for how to configure the collection for some commonly used setups.
 
 #### Explicitly setting the service container names
 
