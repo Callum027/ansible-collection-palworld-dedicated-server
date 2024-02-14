@@ -322,7 +322,7 @@ palworld_dedicated_server_container_service_user_uid: 300
 palworld_dedicated_server_container_service_group_gid: 300
 ```
 
-By default, the service user and group are creating used the name `palworld`.
+By default, the service user and group are created using the name `palworld`.
 These can also be changed using inventory variables.
 
 **Make sure the values you set are not used by any other user/groups on the system.**
@@ -332,7 +332,7 @@ palworld_dedicated_server_service_user_name: palworld
 palworld_dedicated_server_service_group_name: palworld
 ```
 
-### Changing the service UID/GID without creating a service user
+### Changing the container UID/GID without creating a service user
 
 *New in version 2.1.0.*
 
