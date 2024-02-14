@@ -221,6 +221,19 @@ Here is the full list of available inventory variables. They all have sane defau
 
 Here are a few short guides for how to configure the collection for some commonly useds setups.
 
+#### Explicitly setting the service container names
+
+By default, Docker Compose will automatically generate the names for the service containers
+(usually something along the lines of `palworld-dedicated-server_<service-name>_1`).
+
+If you'd prefer to set the container names explicitly for each service,
+you can set them using the following variables (or set them to `null` for auto-generation):
+
+```yaml
+palworld_dedicated_server_container_name: palworld-dedicated-server
+palworld_dedicated_server_exporter_container_name: palworld-exporter
+```
+
 #### Enabling external access to RCON
 
 RCON is always enabled on Palworld itself for a variety of purposes (monitoring, backup, etc), but external access to the RCON port is disabled by default.
@@ -326,19 +339,6 @@ The default container UID and GID are both set to `1000` by default.
 ```yaml
 palworld_dedicated_server_container_default_uid: 1000
 palworld_dedicated_server_container_default_gid: 1000
-```
-
-#### Explicitly setting the service container names
-
-By default, Docker Compose will automatically generate the names for the service containers
-(usually something along the lines of `palworld-dedicated-server_<service-name>_1`).
-
-If you'd prefer to set the container names explicitly for each service,
-you can set them using the following variables (or set them to `null` for auto-generation):
-
-```yaml
-palworld_dedicated_server_container_name: palworld-dedicated-server
-palworld_dedicated_server_exporter_container_name: palworld-exporter
 ```
 
 ## Playbooks
