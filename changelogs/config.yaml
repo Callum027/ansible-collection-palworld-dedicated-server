@@ -30,3 +30,6 @@ sections:
 title: Palworld Dedicated Server Ansible Collection
 trivial_section_name: trivial
 use_fqcn: true
+output_formats:
+  - md
+  - rst

@@ -21,6 +21,8 @@ releases:
         No functional changes have been made.
 
         '
+      trivial:
+      - Documentation improvements (`#5 <https://github.com/Callum027/ansible-collection-palworld-dedicated-server/pull/5>`_)
     fragments:
     - 1.0.1.yaml
     release_date: '2024-02-10'
@@ -60,6 +62,76 @@ releases:
         releases like this should decrease.
 
         '
+      trivial:
+      - Add support for the Palworld Prometheus exporter (`#11 <https://github.com/Callum027/ansible-collection-palworld-dedicated-server/pull/11>`_)
+      - Add test job for building the Ansible Galaxy package (`#10 <https://github.com/Callum027/ansible-collection-palworld-dedicated-server/pull/10>`_)
+      - Palworld will now be configured to always have RCON enabled internally. This
+        for both local RCON CLI command access and enabling the Prometheus exporter.
+        When ``palworld_dedicated_server_rcon_enable`` is set to ``false``, external
+        access to this endpoint is disabled, as it did previously.
     fragments:
     - 2.0.0.yaml
     release_date: '2024-02-13'
+  2.1.0:
+    changes:
+      major_changes:
+      - Add support for creating and configuring Palworld to use service users and
+        groups, and changing permissions on the data files and directories if the
+        configured UID/GID changes.
+      - Add support for setting a custom UID/GID for the service containers without
+        creating a service user.
+      release_summary: 'This release adds support for configuring Palworld Dedicated
+        Server to run with service users and groups.
+
+
+        This is more secure than the default configuration because it ensures that
+        Palworld
+
+        is run using a dedicated system user (with its own UID and GID), configured
+
+        to only have access to resources it needs, and a no-login shell that forbids
+        remote access.
+
+        If any attacker breaks into the host system through a vulnerability in Palworld,
+
+        they will be unable to do anything more than modify files owned by the service
+        user.
+
+
+        This is an opt-in feature that can be enabled by setting ``palworld_dedicated_server_service_user_enable``
+        to ``true``.
+
+
+        If full service users are not desired in your setup, the collection also now
+        supports configuring the container
+
+        to run using a custom UID/GID without creating a service user and group.
+
+        Just set the ``palworld_dedicated_server_container_default_uid`` ``palworld_dedicated_server_container_default_gid``
+
+        inventory variables to the desired values (both set to ``1000`` by default
+        for backwards compatibility).
+
+
+        Existing installations can be converted to run with service users or a custom
+        UID/GID by changing the collection settings,
+
+        and running the ``callum027.palworld_dedicated_server.update`` playbook to
+        apply them (as a container update is required).
+
+
+        For more information, refer to the collection documentation.
+
+        '
+      trivial:
+      - Add automatic publishing to GitHub Releases and Ansible Galaxy, with automatic
+        changelog generation, by simply creating a version tag.
+      - Add support for service users and custom UID/GIDs (`#14 <https://github.com/Callum027/ansible-collection-palworld-dedicated-server/pull/14>`_)
+      - Generate the changelog as a Markdown file (``CHANGELOG.md``), in addition
+        to the existing reStructuredText file (``CHANGELOG.rst``).
+      - Remove the now unused ``docker`` and ``openstack`` Molecule scenarios.
+      - Revamp the Molecule tests to have multiple scenarios based around common use
+        cases, and run them all in a test matrix in GitHub Actions.
+    fragments:
+    - 2.1.0.yaml
+    release_date: '2024-02-15'

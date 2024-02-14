@@ -1,17 +1,70 @@
 name: release
 
 on:
-  release:
-    types:
-      - published
+  push:
+    tags:
+      - "^[0-9]+.[0-9]+.[0-9]+$"
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout release
         uses: actions/checkout@v4
-      - name: Build and publish to Ansible Galaxy
+      - name: Build the Ansible collection package
         uses: artis3n/ansible_galaxy_collection@v2
         with:
           api_key: ${{ secrets.ANSIBLE_GALAXY_API_KEY }}
+          build: true
+          publish: false
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: callum027-palworld_dedicated_server-${{ github.ref_name }}.tar.gz
+          retention-days: 5
+
+  github:
+    runs-on: ubuntu-22.04
+    needs: build
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout release
+        uses: actions/checkout@v4
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build
+          path: callum027-palworld_dedicated_server-${{ github.ref_name }}.tar.gz
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Generate release notes
+        run: antsibull-changelog generate ${{ github.ref_name }} --only-latest
+      - name: Publish the GitHub release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: CHANGELOG.md
+          files: callum027-palworld_dedicated_server-${{ github.ref_name }}.tar.gz
+          fail_on_unmatched_files: true
+
+  ansible-galaxy:
+    runs-on: ubuntu-22.04
+    needs: build
+    steps:
+      - name: Checkout release
+        uses: actions/checkout@v4
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build
+          path: callum027-palworld_dedicated_server-${{ github.ref_name }}.tar.gz
+      - name: Publish to Ansible Galaxy
+        uses: artis3n/ansible_galaxy_collection@v2
+        with:
+          api_key: ${{ secrets.ANSIBLE_GALAXY_API_KEY }}
+          build: false
+          publish: true

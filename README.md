@@ -221,11 +221,11 @@ Here is the full list of available inventory variables. They all have sane defau
     * When set to `null`, the system will automatically assign a unique GID for the service group.
     * Default is `null`.
 
-### How-tos
+## How-tos
 
 Here are a few short guides for how to configure the collection for some commonly used setups.
 
-#### Explicitly setting the service container names
+### Explicitly setting the service container names
 
 By default, Docker Compose will automatically generate the names for the service containers
 (usually something along the lines of `palworld-dedicated-server_<service-name>_1`).
@@ -238,7 +238,7 @@ palworld_dedicated_server_container_name: palworld-dedicated-server
 palworld_dedicated_server_exporter_container_name: palworld-exporter
 ```
 
-#### Enabling external access to RCON
+### Enabling external access to RCON
 
 RCON is always enabled on Palworld itself for a variety of purposes (monitoring, backup, etc), but external access to the RCON port is disabled by default.
 
@@ -264,7 +264,7 @@ If your Palworld server has a slow Internet connection and cannot download from 
 palworld_dedicated_server_rcon_wait_timeout: 600  # seconds
 ```
 
-#### Enabling the Palworld Prometheus exporter
+### Enabling the Palworld Prometheus exporter
 
 *New in version 2.0.0.*
 
@@ -284,16 +284,17 @@ palworld_dedicated_server_exporter_bind_address: "0.0.0.0"
 palworld_dedicated_server_exporter_bind_port: 9877
 ```
 
-#### Enabling the service user
+### Enabling the service user
 
 *New in version 2.1.0.*
 
 The Ansible collection can optionally create a service user and group for
-Palworld Dedicated Server to use, configured to only have access to resources it needs,
-and a no-login shell that forbids remote access.
+Palworld Dedicated Server to use.
 
-This is more secure than the default configuration as it ensures that if any attacker
-breaks into the host system through a vulnerability in Palworld,
+This is more secure than the default configuration because it ensures that Palworld
+is run using a dedicated system user (with its own UID and GID), configured
+to only have access to resources it needs, and a no-login shell that forbids remote access.
+If any attacker breaks into the host system through a vulnerability in Palworld,
 they will be unable to do anything more than modify files owned by the service user.
 
 Existing configurations (that do not currently use service users)
@@ -321,7 +322,7 @@ palworld_dedicated_server_container_service_user_uid: 300
 palworld_dedicated_server_container_service_group_gid: 300
 ```
 
-By default, the service user and group are creating used the name `palworld`.
+By default, the service user and group are created using the name `palworld`.
 These can also be changed using inventory variables.
 
 **Make sure the values you set are not used by any other user/groups on the system.**
@@ -331,7 +332,7 @@ palworld_dedicated_server_service_user_name: palworld
 palworld_dedicated_server_service_group_name: palworld
 ```
 
-#### Changing the service UID/GID without creating a service user
+### Changing the container UID/GID without creating a service user
 
 *New in version 2.1.0.*
 
@@ -344,6 +345,37 @@ The default container UID and GID are both set to `1000` by default.
 palworld_dedicated_server_container_default_uid: 1000
 palworld_dedicated_server_container_default_gid: 1000
 ```
+
+### Install mods into Palworld
+
+Unfortunately this cannot be done automatically at the moment, for the following reasons:
+
+* [Nexus Mods](https://www.nexusmods.com/palworld), the largest mod repository for Palworld, only allows downloads from logged in users, and limits the download speed for free users.
+* Mods are standardised to use the `.pak` file format, but the ZIP files they are contained in are not (some of them have convoluted file structures), making it difficult to automate installation.
+* Some mods require [RE-UE4SS](https://docs.ue4ss.com), which is not available for Linux.
+
+Some mods, however, *can* be installed manually. Below is the procedure for doing so.
+If you have changed the install directory or service users/UIDs/GIDs in your installation,
+substitute them where `/opt/palworld-dedicated-server` and `palworld` are in the instructions below.
+
+1. Copy all of the mod `.pak` files you wish to install to the dedicated server. This guide assumes they will be available from `/home/<user>`. If you access the server using SSH, the files can be copied using the `scp` command:
+    ```bash
+    scp <mod-name>.pak <user>@<server-hostname>:/home/<user>/<mod-name>.pak
+    ```
+1. Temporarily stop the Palworld Dedicated Server, either using the [`callum027.palworld_dedicated_server.stop`](#callum027palworld_dedicated_serverstop) playbook, or running the following command:
+    ```bash
+    sudo su -c 'cd /opt/palworld-dedicated-server && docker compose stop'
+    ```
+1. For each mod, install its corresponding `.pak` file to the Palworld `.pak` file directory:
+    ```bash
+    sudo install --mode=755 --owner=palworld --group=palworld --target-directory=/opt/palworld-dedicated-server/data/Pal/Content/Paks /home/<user>/<mod-name>.pak
+    ```
+1. Restart the Palworld Dedicated Server, either using the [`callum027.palworld_dedicated_server.install`](#callum027palworld_dedicated_serverinstall) playbook, or running the following command:
+    ```bash
+    sudo su -c 'cd /opt/palworld-dedicated-server && docker compose up -d'
+    ```
+
+Make sure any mods installed on the dedicated server are also installed into your Palworld client installed locally.
 
 ## Playbooks
 
