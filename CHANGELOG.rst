@@ -4,6 +4,37 @@ Palworld Dedicated Server Ansible Collection Release Notes
 
 .. contents:: Topics
 
+v2.1.0
+======
+
+Release Summary
+---------------
+
+This release adds support for configuring Palworld Dedicated Server to run with service users and groups.
+
+This is more secure than the default configuration because it ensures that Palworld
+is run using a dedicated system user (with its own UID and GID), configured
+to only have access to resources it needs, and a no-login shell that forbids remote access.
+If any attacker breaks into the host system through a vulnerability in Palworld,
+they will be unable to do anything more than modify files owned by the service user.
+
+This is an opt-in feature that can be enabled by setting ``palworld_dedicated_server_service_user_enable`` to ``true``.
+
+If full service users are not desired in your setup, the collection also now supports configuring the container
+to run using a custom UID/GID without creating a service user and group.
+Just set the ``palworld_dedicated_server_container_default_uid`` ``palworld_dedicated_server_container_default_gid``
+inventory variables to the desired values (both set to ``1000`` by default for backwards compatibility).
+
+Existing installations can be converted to run with service users or a custom UID/GID by changing the collection settings,
+and running the ``callum027.palworld_dedicated_server.update`` playbook to apply them (as a container update is required).
+
+For more information, refer to the collection documentation.
+
+Major Changes
+-------------
+
+- Add support for creating and configuring Palworld to use service users and groups, and changing permissions on the data files and directories if the configured UID/GID changes.
+- Add support for setting a custom UID/GID for the service containers without creating a service user.
 
 v2.0.0
 ======
@@ -16,7 +47,6 @@ This release adds support for orchestrating a Prometheus exporter alongside the 
 Enable it by setting ``palworld_dedicated_server_exporter_enable`` to ``true``, and configure the bind IP address and port with ``palworld_dedicated_server_exporter_bind_address`` (defaults to ``0.0.0.0``) and ``palworld_dedicated_server_exporter_bind_port`` (defaults to ``9877``).
 
 This is a major version upgrade as unfortunately a number of breaking changes were required in this release. In the future the necessity of major version releases like this should decrease.
-
 
 Major Changes
 -------------
@@ -51,7 +81,6 @@ used by the collection, and configuring it with Palworld game settings.
 The role README file titles have also been fixed to refer to the correct respective roles.
 
 No functional changes have been made.
-
 
 v1.0.0
 ======
