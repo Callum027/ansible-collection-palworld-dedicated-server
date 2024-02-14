@@ -13,7 +13,7 @@
         gid: "{{ palworld_dedicated_server_service_group_gid | default(omit, true) }}"
     - name: Create service user
       ansible.builtin.user:
-        name: "{{ palworld_dedicated_server_user_name }}"
+        name: "{{ palworld_dedicated_server_service_user_name }}"
         uid: "{{ palworld_dedicated_server_user_uid | default(omit, true) }}"
         group: "{{ palworld_dedicated_server_service_group_name }}"
         groups: "{{ palworld_dedicated_server_service_user_additional_groups }}"
@@ -25,7 +25,7 @@
         - name: Get service user metadata
           ansible.builtin.getent:
             database: passwd
-            key: "{{ palworld_dedicated_server_user_name }}"
+            key: "{{ palworld_dedicated_server_service_user_name }}"
         - name: Set container user UID and GID to the service user
           ansible.builtin.set_fact:
             palworld_dedicated_server_temp_uid: "{{ getent_passwd['palworld'][1] | int }}"
@@ -37,7 +37,7 @@
               - ansible_check_mode
             success_msg: Service user does not exist, setting placeholder UID and GID for check mode
             fail_msg: >-
-              Getting metadata for service user '{{ palworld_dedicated_server_user_name }}' failed,
+              Getting metadata for service user '{{ palworld_dedicated_server_service_user_name }}' failed,
               check that the service user was created properly
             quiet: true
         - name: Set container user UID and GID to placeholders (if in check mode, and service user does not exist)
